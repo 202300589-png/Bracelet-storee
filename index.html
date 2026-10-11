@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bracelet</title>
+<meta name="description" content="Arabic name jewelry: pendants, necklaces and rings made to order.">
+<style>
+/* Layout: sticky wordmark bar, split hero (type left, photo right), product grid (2 columns on phones, 2 to 4 on desktop),
+   product dialog with a photo gallery, slide-in cart. Colors, fonts, corners and columns come from the saved theme. */
+:root{
+  --bg:#0b1426; --ink:#ede8dc; --gold:#d2ae5c; --btn-bg:#d2ae5c; --btn-fg:#111111; --accent-fill:#d2ae5c; --accent-fg:#111111;
+  --card:#1a2336; --line:#313b4d; --mute:#a5a9b0;
+  --display:'Gilda Display',Georgia,serif; --body:'Jost','Helvetica Neue',Arial,sans-serif; --dw:400; --radius:2px; --cols:3;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px}
+.wrap{max-width:1120px;margin-inline:auto}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+img{max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+h1,h2,h3{font-family:var(--display);font-weight:var(--dw);margin:0;text-wrap:balance}
+.pending main{visibility:hidden}
+
+/* header */
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:14px 16px}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{font-family:var(--display);font-weight:var(--dw);font-size:26px;letter-spacing:.32em;text-transform:uppercase;text-decoration:none}
+.cart-open{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--ink);border-radius:999px;padding:7px 16px;font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.cart-open b{font-weight:500;background:var(--accent-fill);color:var(--accent-fg);min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center;font-size:13px}
+
+/* hero */
+.hero{display:grid;gap:28px;padding-block:36px 44px;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:0 0 14px}
+.hero h1{font-size:clamp(40px,8vw,76px);line-height:1.04}
+.hero p.lead{color:var(--mute);max-width:44ch;margin:18px 0 26px}
+.btn{display:inline-block;background:var(--btn-bg);color:var(--btn-fg);border:0;border-radius:var(--radius);padding:13px 26px;text-decoration:none;font-size:14px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.hero figure{margin:0}
+.hero img{display:block;width:100%;max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius)}
+.hero figcaption{font-size:13px;color:var(--mute);padding-top:8px;display:flex;justify-content:space-between;gap:12px}
+@media(min-width:820px){.hero{grid-template-columns:1fr 1fr;gap:56px;padding-block:56px 64px}}
+
+/* perks */
+.perks{display:grid;gap:14px;border-block:1px solid var(--line);padding-block:20px;margin-bottom:48px}
+.perks div{font-size:14px;color:var(--mute)}
+.perks strong{display:block;color:var(--ink);font-weight:500;letter-spacing:.04em}
+@media(min-width:700px){.perks{grid-template-columns:repeat(3,1fr)}}
+
+/* shop */
+.shop-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:14px;margin-bottom:22px}
+.shop-head h2{font-size:clamp(30px,5vw,44px)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-size:14px}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 14px;padding-bottom:72px}
+@media(min-width:820px){.grid{grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:36px 24px}}
+.item{display:flex;flex-direction:column;min-width:0}
+.item .ph{display:block;position:relative;width:100%;padding:0;border:0;background:var(--card);overflow:hidden;border-radius:var(--radius)}
+.item .ph img{display:block;width:100%;max-width:100%;aspect-ratio:1;object-fit:cover;transition:transform .5s}
+.item .ph:hover img{transform:scale(1.03)}
+.item.out .ph img{opacity:.5}
+.count{position:absolute;inset-inline-end:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:2px 9px;border-radius:999px;font-variant-numeric:tabular-nums}
+.item .cat{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-top:12px}
+.item h3{font-size:21px;line-height:1.2;margin-top:2px}
+.titlebtn{background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.item .desc{font-size:14px;color:var(--mute);margin:4px 0 0}
+.item .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:12px;flex-wrap:wrap}
+.price{font-variant-numeric:tabular-nums;font-weight:500}
+.add{background:transparent;border:1px solid var(--ink);border-radius:var(--radius);padding:7px 14px;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.add:hover:not([disabled]),.add.done{background:var(--ink);color:var(--bg)}
+.add[disabled]{opacity:.5;cursor:not-allowed}
+.empty-shop{color:var(--mute);padding-bottom:72px}
+
+footer{border-top:1px solid var(--line);padding-block:28px 40px;color:var(--mute);font-size:14px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
+
+/* product dialog */
+#pm{position:fixed;inset:0;z-index:12;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px}
+.pm-box{position:relative;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius);width:min(920px,100%);max-height:calc(100% - 8px);overflow:auto;display:grid;gap:20px;padding:16px}
+@media(min-width:760px){.pm-box{grid-template-columns:1.1fr 1fr;padding:24px;gap:30px}}
+.pm-main{position:relative;background:var(--card);border-radius:var(--radius);overflow:hidden;touch-action:pan-y}
+.pm-main img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:22px;line-height:1}
+.nav.prev{left:8px}.nav.next{right:8px}
+.thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px}
+.thumbs button{flex:none;width:64px;height:64px;padding:0;border:2px solid transparent;border-radius:var(--radius);overflow:hidden;background:var(--card);opacity:.7}
+.thumbs button[aria-current="true"]{border-color:var(--gold);opacity:1}
+.thumbs img{display:block;width:100%;height:100%;object-fit:cover}
+.pm-info{display:flex;flex-direction:column;gap:6px;min-width:0;align-self:center}
+.pm-info h3{font-size:30px;line-height:1.15}
+.pm-info .cat{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.pm-info .price{font-size:20px}
+.pm-info .desc{color:var(--mute);margin:6px 0 14px}
+.pm-info .add{align-self:flex-start;padding:11px 22px}
+#pmx{position:absolute;top:6px;right:8px;z-index:2;background:rgba(0,0,0,.45);color:#fff;width:36px;height:36px;border-radius:50%;border:0;font-size:24px;line-height:1}
+
+/* cart */
+#shade{position:fixed;inset:0;background:rgba(5,10,22,.5);opacity:0;visibility:hidden;transition:opacity .2s;z-index:9}
+#shade.on{opacity:1;visibility:visible}
+#cart{position:fixed;z-index:13;top:0;bottom:0;right:0;width:min(420px,100%);background:var(--bg);border-left:1px solid var(--line);transform:translateX(105%);visibility:hidden;transition:transform .25s,visibility .25s;display:flex;flex-direction:column;padding:18px 20px calc(18px + env(safe-area-inset-bottom,0px))}
+#cart.on{transform:none;visibility:visible}
+.cart-top{display:flex;justify-content:space-between;align-items:center}
+.cart-top h2{font-size:28px}
+.x{background:none;border:0;font-size:28px;line-height:1;padding:4px 8px}
+#lines{flex:1;overflow:auto;min-height:0;margin-block:10px}
+.line{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line)}
+.line img{width:64px;height:64px;object-fit:cover;display:block;border-radius:var(--radius);background:var(--card)}
+.line .t{font-size:15px;line-height:1.3}
+.line .s{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.qty{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.qty button{width:28px;height:28px;border:1px solid var(--line);background:transparent;border-radius:50%;line-height:1}
+.none{color:var(--mute);padding-block:28px}
+.engrave label{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
+.engrave input{width:100%;background:var(--card);border:1px solid var(--line);padding:10px 12px;border-radius:var(--radius)}
+.sum{display:flex;justify-content:space-between;font-size:18px;padding-block:14px 12px;font-variant-numeric:tabular-nums}
+.send{display:block;text-align:center}
+.send[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.note{font-size:13px;color:var(--mute);margin:10px 0 0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script src="data/theme.js"></script>
+<script src="data/default-store.js"></script>
+<script>
+/* Apply the last saved look right away so the page does not flash the wrong colors. */
+try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply(c||window.DEFAULT_STORE.store.theme)}catch(e){}
+</script>
+</head>
+<body class="pending">
+
+<header><div class="wrap">
+  <a class="mark" href="#top" id="top">Bracelet</a>
+  <button class="cart-open" id="open" aria-label="Open cart">Cart <b id="cnt">0</b></button>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow" id="eyebrow"></p>
+      <h1 id="title"></h1>
+      <p class="lead" id="lead"></p>
+      <a class="btn" href="#shop">Shop the collection</a>
+    </div>
+    <figure><img id="heroimg" alt="Featured piece"><figcaption id="herocap"></figcaption></figure>
+  </section>
+
+  <section class="perks" id="perks"></section>
+
+  <section id="shop">
+    <div class="shop-head">
+      <h2>The collection</h2>
+      <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<footer class="wrap"><span id="foot"></span><span>Order by WhatsApp</span></footer>
+
+<div id="pm" hidden role="dialog" aria-modal="true" aria-label="Product details">
+  <div class="pm-box">
+    <button id="pmx" type="button" aria-label="Close">&times;</button>
+    <div>
+      <div class="pm-main" id="pmmain">
+        <img id="pmimg" alt="">
+        <button class="nav prev" id="pmprev" type="button" aria-label="Previous photo">&lsaquo;</button>
+        <button class="nav next" id="pmnext" type="button" aria-label="Next photo">&rsaquo;</button>
+        <span class="count" id="pmcount"></span>
+      </div>
+      <div class="thumbs" id="pmthumbs"></div>
+    </div>
+    <div class="pm-info">
+      <div class="cat" id="pmcat"></div>
+      <h3 id="pmname"></h3>
+      <div class="price" id="pmprice"></div>
+      <p class="desc" id="pmdesc"></p>
+      <button class="add" id="pmadd" type="button"></button>
+    </div>
+  </div>
+</div>
+
+<div id="shade"></div>
+<aside id="cart" aria-label="Cart">
+  <div class="cart-top"><h2>Your cart</h2><button class="x" id="close" aria-label="Close cart">&times;</button></div>
+  <div id="lines"></div>
+  <div class="engrave">
+    <label for="engrave">Name or word to engrave</label>
+    <input id="engrave" type="text" placeholder="e.g. Nour, or نور" autocomplete="off">
+  </div>
+  <div class="sum"><span>Total</span><span id="tot"></span></div>
+  <a class="btn send" id="send" href="#" target="_blank" rel="noopener" aria-disabled="true">Send order on WhatsApp</a>
+  <p class="note" id="note"></p>
+</aside>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+  var D=window.DEFAULT_STORE, STORE, PRODUCTS, cat="All", cart={}, cur=null, idx=0, lastFocus=null;
+  try{cart=JSON.parse(localStorage.getItem("bracelet-cart")||"{}")}catch(e){cart={}}
+  var money=function(n){return Number(n).toLocaleString("en-US")+" "+STORE.currency};
+  var find=function(id){return PRODUCTS.filter(function(p){return p.id===id})[0]};
+  var save=function(){try{localStorage.setItem("bracelet-cart",JSON.stringify(cart))}catch(e){}};
+
+  /* ----- shop ----- */
+  function drawChips(){
+    var cats=["All"].concat(PRODUCTS.map(function(p){return p.category}).filter(function(v,i,a){return a.indexOf(v)===i}));
+    if(cats.indexOf(cat)<0)cat="All";
+    $("chips").hidden=cats.length<3;
+    $("chips").innerHTML=cats.map(function(c){return '<button type="button" data-c="'+esc(c)+'" aria-pressed="'+(c===cat)+'">'+esc(c)+"</button>"}).join("");
+  }
+  function drawGrid(){
+    var list=PRODUCTS.filter(function(p){return cat==="All"||p.category===cat});
+    $("grid").innerHTML=list.map(function(p){
+      var n=p.images.length;
+      return '<article class="item'+(p.soldOut?' out':'')+'"><button class="ph" type="button" data-open="'+esc(p.id)+'" aria-label="View '+esc(p.name)+'">'+
+        (n?'<img src="'+esc(p.images[0])+'" alt="'+esc(p.name)+'" loading="lazy">':'<img alt="" style="visibility:hidden">')+(n>1?'<span class="count">1 / '+n+'</span>':'')+'</button>'+
+        '<div class="cat">'+esc(p.category)+'</div><h3><button class="titlebtn" type="button" data-open="'+esc(p.id)+'">'+esc(p.name)+'</button></h3><p class="desc">'+esc(p.desc)+'</p>'+
+        '<div class="foot"><span class="price">'+money(p.price)+'</span>'+
+        (p.soldOut?'<button class="add" type="button" disabled>Sold out</button>':'<button class="add" type="button" data-add="'+esc(p.id)+'">Add to cart</button>')+'</div></article>'}).join("");
+    if(!list.length)$("grid").innerHTML='<p class="empty-shop">New pieces are on the way.</p>';
+  }
+
+  /* ----- cart ----- */
+  function drawCart(){
+    var ids=Object.keys(cart).filter(function(k){var p=find(k);return cart[k]>0&&p&&!p.soldOut}),total=0,n=0,msg="Hi "+STORE.name+", I would like to order:\n";
+    $("lines").innerHTML=ids.length?ids.map(function(k){
+      var p=find(k),q=cart[k];total+=p.price*q;n+=q;msg+="- "+p.name+" x "+q+" ("+money(p.price*q)+")\n";
+      return '<div class="line"><img src="'+esc(p.images[0]||"")+'" alt=""><div><div class="t">'+esc(p.name)+'</div><div class="s">'+money(p.price*q)+'</div></div>'+
+        '<div class="qty"><button type="button" data-m="'+esc(k)+'" aria-label="Remove one">&minus;</button><span>'+q+'</span><button type="button" data-a="'+esc(k)+'" aria-label="Add one">+</button></div></div>'}).join(""):
+      '<div class="none">Your cart is empty. Add a piece from the collection.</div>';
+    var eng=$("engrave").value.trim();
+    if(eng)msg+="Name to engrave: "+eng+"\n";
+    msg+="Total: "+money(total);
+    $("tot").textContent=money(total);$("cnt").textContent=n;
+    var s=$("send"),ok=ids.length&&STORE.whatsapp;
+    s.setAttribute("aria-disabled",ok?"false":"true");
+    s.href=ok?"https://wa.me/"+STORE.whatsapp+"?text="+encodeURIComponent(msg):"#";
+    save();
+  }
+  function toggle(on){$("cart").classList.toggle("on",on);$("shade").classList.toggle("on",on);if(on)$("close").focus()}
+
+  /* ----- product dialog with photo gallery ----- */
+  function drawP(){
+    var im=cur.images,many=im.length>1;
+    $("pmimg").hidden=!im.length;$("pmimg").src=im[idx]||"";$("pmimg").alt=cur.name;
+    $("pmprev").hidden=$("pmnext").hidden=!many;
+    $("pmcount").hidden=!many;$("pmcount").textContent=(idx+1)+" / "+im.length;
+    $("pmthumbs").hidden=!many;
+    $("pmthumbs").innerHTML=many?im.map(function(u,i){return '<button type="button" data-t="'+i+'" aria-label="Photo '+(i+1)+'"'+(i===idx?' aria-current="true"':'')+'><img src="'+esc(u)+'" alt=""></button>'}).join(""):"";
+    $("pmcat").textContent=cur.category;$("pmname").textContent=cur.name;$("pmprice").textContent=money(cur.price);$("pmdesc").textContent=cur.desc;
+    var b=$("pmadd");b.disabled=!!cur.soldOut;b.textContent=cur.soldOut?"Sold out":"Add to cart";b.classList.remove("done");
+  }
+  function openP(id){
+    cur=find(id);if(!cur)return;idx=0;lastFocus=document.activeElement;
+    drawP();$("pm").hidden=false;document.body.style.overflow="hidden";$("pmx").focus();
+  }
+  function closeP(){
+    $("pm").hidden=true;document.body.style.overflow="";cur=null;
+    if(lastFocus&&lastFocus.focus)lastFocus.focus();
+  }
+  function step(d){if(!cur||cur.images.length<2)return;idx=(idx+d+cur.images.length)%cur.images.length;drawP()}
+
+  function flash(b){b.textContent="Added";b.classList.add("done");setTimeout(function(){b.textContent="Add to cart";b.classList.remove("done")},1100)}
+
+  function start(d){
+    STORE=Object.assign({},D.store,d.store);
+    STORE.theme=Theme.apply(STORE.theme);
+    try{localStorage.setItem("bracelet-theme",JSON.stringify(STORE.theme))}catch(e){}
+    PRODUCTS=d.products.filter(function(p){return p.visible!==false}).map(function(p){
+      p.images=Array.isArray(p.images)&&p.images.length?p.images:(p.image?[p.image]:[]);return p});
+    document.title=STORE.name;
+    document.querySelector(".mark").textContent=STORE.name;
+    $("eyebrow").textContent=STORE.heroEyebrow;$("eyebrow").hidden=!STORE.heroEyebrow;
+    $("title").textContent=STORE.heroTitle;$("lead").textContent=STORE.heroLead;
+    $("heroimg").src=STORE.heroImage;$("herocap").textContent=STORE.heroCaption;
+    $("perks").innerHTML=(STORE.perks||[]).filter(function(p){return p[0]||p[1]}).map(function(p){return "<div><strong>"+esc(p[0])+"</strong>"+esc(p[1])+"</div>"}).join("");
+    $("perks").hidden=!$("perks").innerHTML;
+    $("foot").textContent="© 2026 "+STORE.name;
+    $("note").textContent="Your order opens in WhatsApp as a ready message to +"+STORE.whatsapp+". Nothing is paid on this page.";
+    drawChips();drawGrid();drawCart();
+    document.body.classList.remove("pending");
+  }
+
+  document.addEventListener("click",function(e){
+    var o=e.target.closest("[data-open]");if(o){openP(o.dataset.open);return}
+    var b=e.target.closest("button");if(!b)return;
+    if(b.dataset.c){cat=b.dataset.c;drawChips();drawGrid()}
+    if(b.dataset.add){cart[b.dataset.add]=(cart[b.dataset.add]||0)+1;drawCart();flash(b)}
+    if(b.dataset.a){cart[b.dataset.a]++;drawCart()}
+    if(b.dataset.m){cart[b.dataset.m]--;drawCart()}
+    if(b.dataset.t){idx=Number(b.dataset.t);drawP()}
+  });
+  $("pmadd").onclick=function(){if(!cur)return;cart[cur.id]=(cart[cur.id]||0)+1;drawCart();flash(this)};
+  $("pmx").onclick=closeP;
+  $("pm").addEventListener("click",function(e){if(e.target===this)closeP()});
+  $("pmprev").onclick=function(){step(-1)};$("pmnext").onclick=function(){step(1)};
+  var tx=null;
+  $("pmmain").addEventListener("touchstart",function(e){tx=e.touches[0].clientX},{passive:true});
+  $("pmmain").addEventListener("touchend",function(e){if(tx==null)return;var dx=e.changedTouches[0].clientX-tx;tx=null;if(Math.abs(dx)>40)step(dx<0?1:-1)});
+  $("open").onclick=function(){toggle(true)};
+  $("close").onclick=$("shade").onclick=function(){toggle(false);$("open").focus()};
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){if(!$("pm").hidden)closeP();else toggle(false)}
+    if(!$("pm").hidden){if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)}
+  });
+  $("engrave").addEventListener("input",drawCart);
+
+  // Load what the owner saved from the admin panel. If that is not available
+  // (first visit before any save, or a slow connection), use the built-in data.
+  var ctl=window.AbortController?new AbortController():null;
+  var timer=setTimeout(function(){if(ctl)ctl.abort()},2500);
+  fetch("/api/store",ctl?{signal:ctl.signal}:{}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(d){
+    clearTimeout(timer);
+    start(d&&d.store&&Array.isArray(d.products)?d:JSON.parse(JSON.stringify(D)));
+  });
+})();
+</script>
+</body>
+</html>

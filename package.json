@@ -1,0 +1,9 @@
+{
+  "name": "bracelet-store",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bracelet online accessories store with a password-protected admin panel",
+  "dependencies": {
+    "@vercel/blob": "*"
+  }
+}

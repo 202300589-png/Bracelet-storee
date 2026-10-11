@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة تحكم Bracelet</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Gilda+Display&display=swap">
+<style>
+:root{
+  --bg:#ECE9E3; --card:#F7F5F1; --ink:#0E1A33; --mute:#5A6378; --line:#D5D0C6;
+  --gold:#9A7424; --btn-bg:#0E1A33; --btn-fg:#F7F5F1; --ok:#1F7A4D; --bad:#B3261E;
+  --display:'Gilda Display',Georgia,serif; --body:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B1426; --card:#121D35; --ink:#EDE8DC; --mute:#9EA8BE; --line:#26334F;
+  --gold:#D2AE5C; --btn-bg:#D2AE5C; --btn-fg:#0B1426; --ok:#5CC590; --bad:#FF8A80; color-scheme:dark}}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.brand{font-family:var(--display);letter-spacing:.3em;text-transform:uppercase;font-weight:400}
+
+/* buttons and fields */
+.btn{background:var(--btn-bg);color:var(--btn-fg);border:0;border-radius:6px;padding:9px 20px;font-weight:600}
+.btn[disabled]{opacity:.4;cursor:default}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 14px}
+.ghost:hover{border-color:var(--ink)}
+.danger{color:var(--bad);border-color:var(--bad)}
+label{display:block;font-size:14px;color:var(--mute);margin-bottom:4px}
+input[type=text],input[type=password],input[type=number],textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:9px 12px}
+textarea{min-height:76px;resize:vertical}
+.ltr{direction:ltr;text-align:left}
+.hint{font-size:13px;color:var(--mute);margin:4px 0 0}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding-block:24px}
+.box{width:min(380px,100%);display:grid;gap:12px}
+.box h1{font-size:34px;margin:0;text-align:center}
+.box p{margin:0;color:var(--mute);text-align:center}
+.err{color:var(--bad);min-height:1.5em;font-size:14px}
+
+/* app */
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:10px 16px}
+.bar .in{max-width:960px;margin-inline:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bar .brand{font-size:20px;margin-inline-end:auto}
+.state{font-size:14px;color:var(--mute)}
+.state.dirty{color:var(--gold);font-weight:600}
+main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 18px}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sec-head h2{margin:0;font-size:20px}
+.banner{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:14px;color:var(--mute);margin-bottom:14px}
+
+/* product rows */
+#plist{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.prow{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
+.prow .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.thumb{width:68px;height:68px;border-radius:4px;object-fit:cover;background:var(--line);display:grid;place-items:center;font-size:11px;color:var(--mute);flex:none}
+.meta{flex:1 1 160px;min-width:0}
+.meta strong{display:block;overflow-wrap:anywhere}
+.meta .sub{font-size:14px;color:var(--mute);display:flex;gap:14px;flex-wrap:wrap}
+.flags{display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
+.flags label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts .ghost{padding:5px 12px;font-size:14px}
+.form{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.f.wide{grid-column:1/-1}
+.file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.filebtn{display:inline-block;cursor:pointer;color:var(--ink)}
+.gal{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.gi{display:grid;gap:6px;justify-items:center;width:104px}
+.gi .gthumb{width:104px;height:104px;border-radius:6px;object-fit:cover;background:var(--line)}
+.gi .ghost{padding:3px 8px;font-size:12px;width:100%}
+.gi .main{font-size:12px;color:var(--gold);font-weight:600;padding:3px 0}
+.perk{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-bottom:10px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.panel h3{grid-column:1/-1;margin:6px 0 0;font-size:16px}
+.panel h3:first-child{margin-top:0}
+.imgblock{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.imgblock .thumb{width:110px;height:110px}
+
+/* appearance tab */
+.look{display:grid;gap:18px}
+.group{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.group h3{margin:0 0 4px;font-size:16px}
+.group .hint{margin:0 0 12px}
+.opts{display:flex;gap:10px;flex-wrap:wrap}
+.opt{background:transparent;border:1px solid var(--line);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px}
+.opt[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.dots{display:flex}
+.dots i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(128,128,128,.5);margin-inline-start:-5px}
+.dots i:first-child{margin-inline-start:0}
+.fontopt{flex-direction:column;align-items:flex-start;gap:2px;min-width:140px;text-align:start}
+.fontopt .s1{font-size:22px;line-height:1.2;direction:ltr}
+.fontopt .s2{font-size:13px;color:var(--mute);direction:ltr}
+.colors{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.colors .c{display:flex;align-items:center;gap:12px}
+.colors input[type=color]{width:46px;height:46px;padding:0;border:1px solid var(--line);border-radius:8px;background:none;flex:none;cursor:pointer}
+.colors label{margin:0;color:var(--ink)}
+.colors small{display:block;color:var(--mute);font-size:12px}
+/* live preview (its colors come from the chosen theme, set inline) */
+.pv{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-family:var(--body);direction:ltr;text-align:left}
+.pv-bar{padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:var(--dw);letter-spacing:.3em;text-transform:uppercase}
+.pv-body{padding:16px 14px 18px}
+.pv small{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.pv h4{font-family:var(--display);font-weight:var(--dw);font-size:28px;line-height:1.1;margin:4px 0 6px}
+.pv p{margin:0 0 12px;font-size:13px;color:var(--mute);max-width:40ch}
+.pv-btn{display:inline-block;background:var(--btn-bg);color:var(--btn-fg);border-radius:var(--radius);padding:7px 14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.pv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.pv-card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius);background:var(--card)}
+.pv-card span{display:block;font-size:11px;margin-top:4px}
+.pv-card b{font-weight:500;color:var(--gold);font-size:11px}
+
+#toast{position:fixed;inset-inline:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));margin-inline:auto;width:fit-content;max-width:100%;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:6px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+#toast.bad{background:var(--bad);color:#fff}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script src="data/theme.js"></script>
+<script src="data/default-store.js"></script>
+</head>
+<body>
+
+<div id="login" class="login">
+  <form id="loginForm" class="box">
+    <h1 class="brand">Bracelet</h1>
+    <p>لوحة التحكم في المتجر</p>
+    <div>
+      <label for="pw">كلمة السر</label>
+      <input id="pw" type="password" class="ltr" autocomplete="current-password" required>
+    </div>
+    <div class="err" id="loginErr" role="alert"></div>
+    <button class="btn" type="submit" id="loginBtn">دخول</button>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <div class="bar"><div class="in">
+    <span class="brand">Bracelet</span>
+    <span class="state" id="state" role="status"></span>
+    <a class="ghost" href="/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">عرض الموقع</a>
+    <button class="btn" id="save" type="button" disabled>حفظ التعديلات</button>
+    <button class="ghost" id="logout" type="button">خروج</button>
+  </div></div>
+
+  <main>
+    <div class="tabs" role="group" aria-label="الأقسام">
+      <button type="button" id="tabP" aria-pressed="true">المنتجات</button>
+      <button type="button" id="tabL" aria-pressed="false">الشكل والألوان</button>
+      <button type="button" id="tabS" aria-pressed="false">إعدادات المتجر</button>
+    </div>
+    <div class="banner" id="banner" hidden>لسه ما حفظتش أي تعديل. اللي قدامك هي البيانات الأصلية للموقع، وأول ما تدوس حفظ هتبقى هي المعتمدة.</div>
+
+    <section id="viewP">
+      <div class="sec-head"><h2>المنتجات</h2><button class="btn" type="button" id="addP">+ منتج جديد</button></div>
+      <ul id="plist"></ul>
+      <datalist id="cats"></datalist>
+    </section>
+
+    <section id="viewL" hidden>
+      <div class="sec-head"><h2>الشكل والألوان</h2></div>
+      <div class="look" id="look"></div>
+    </section>
+
+    <section id="viewS" hidden>
+      <div class="sec-head"><h2>إعدادات المتجر</h2></div>
+      <div class="panel" id="settings"></div>
+    </section>
+  </main>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+  var src=function(u){return /^img\//.test(u)?"/"+u:u};
+  var DEF=window.DEFAULT_STORE, MAXIMG=8;
+  var pw="",data=null,dirty=false,openId=null,tab="products",delId=null,toastT=null;
+  try{pw=sessionStorage.getItem("bracelet-admin")||""}catch(e){}
+
+  /* ---------- helpers ---------- */
+  function toast(msg,bad){var t=$("toast");t.textContent=msg;t.className="on"+(bad?" bad":"");clearTimeout(toastT);toastT=setTimeout(function(){t.className=""},3800)}
+  function api(path,body){
+    return fetch(path,{method:body?"POST":"GET",headers:{"Content-Type":"application/json","x-admin-password":pw},body:body?JSON.stringify(body):undefined})
+      .then(function(r){return r.json().catch(function(){return {}}).then(function(j){return {status:r.status,body:j}})});
+  }
+  function setDirty(v){dirty=v;$("save").disabled=!v;var s=$("state");s.textContent=v?"فيه تعديلات لسه ما اتحفظتش":"كل حاجة محفوظة";s.className="state"+(v?" dirty":"")}
+  function backToLogin(msg){$("app").hidden=true;$("login").hidden=false;$("loginErr").textContent=msg||"";$("pw").focus();try{sessionStorage.removeItem("bracelet-admin")}catch(e){}}
+  function imgs(p){return p.images||(p.images=p.image?[p.image]:[])}
+
+  /* ---------- login ---------- */
+  function login(pass){
+    pw=pass;
+    return api("/api/login",{}).then(function(r){
+      if(r.status===200){try{sessionStorage.setItem("bracelet-admin",pw)}catch(e){}return true}
+      if(r.status===503)throw new Error("لسه ما حطيتش كلمة السر في إعدادات Vercel (ADMIN_PASSWORD). اتبع خطوات التفعيل وجرّب تاني.");
+      if(r.status===401)throw new Error("كلمة السر غلط.");
+      throw new Error("اللوحة مش شغالة على الرابط ده. لازم تكون مرفوعة على Vercel ومعاها فولدر api.");
+    });
+  }
+  $("loginForm").addEventListener("submit",function(e){
+    e.preventDefault();$("loginErr").textContent="";$("loginBtn").disabled=true;
+    login($("pw").value).then(enter).catch(function(err){$("loginErr").textContent=err.message}).then(function(){$("loginBtn").disabled=false});
+  });
+
+  function enter(){
+    return fetch("/api/store?fresh=1",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(d){
+      var saved=d&&d.store&&Array.isArray(d.products);
+      data=saved?{store:Object.assign({},DEF.store,d.store),products:d.products}:JSON.parse(JSON.stringify(DEF));
+      data.store.theme=Theme.normalize(data.store.theme);
+      data.products.forEach(imgs);
+      $("banner").hidden=saved;
+      $("login").hidden=true;$("app").hidden=false;
+      setDirty(false);openId=null;render();
+    });
+  }
+
+  /* ---------- products ---------- */
+  function thumb(p){var u=imgs(p)[0];return u?'<img class="thumb" src="'+esc(src(u))+'" alt="">':'<div class="thumb">بدون صورة</div>'}
+  function galleryHtml(p){
+    var g=imgs(p).map(function(u,i){
+      return '<div class="gi"><img class="gthumb" src="'+esc(src(u))+'" alt="">'+
+        (i===0?'<span class="main">الرئيسية</span>':'<button type="button" class="ghost" data-g="main" data-i="'+i+'">خليها الرئيسية</button>')+
+        '<button type="button" class="ghost danger" data-g="del" data-i="'+i+'">حذف</button></div>'}).join("");
+    var add=imgs(p).length<MAXIMG?'<label class="ghost filebtn" for="f-img">+ إضافة صور</label><input id="f-img" class="file" type="file" accept="image/*" multiple data-img="1">':'<p class="hint">وصلت للحد الأقصى ('+MAXIMG+' صور).</p>';
+    return '<div class="gal">'+g+'</div>'+add+'<p class="hint">أول صورة هي اللي بتظهر على كارت المنتج. تقدر تختار أكتر من صورة مرة واحدة، وبتتصغّر تلقائيًا قبل الرفع.</p>';
+  }
+  function rowHtml(p){
+    var open=p.id===openId,confirming=p.id===delId,n=imgs(p).length;
+    var h='<li class="prow" data-id="'+esc(p.id)+'"><div class="head">'+thumb(p)+
+      '<div class="meta"><strong data-s="name">'+esc(p.name||"(بدون اسم)")+'</strong><span class="sub"><span data-s="cat" class="ltr">'+esc(p.category)+'</span><span class="ltr"><b data-s="price">'+esc(p.price)+'</b> '+esc(data.store.currency)+'</span><span>'+n+' صور</span></span></div>'+
+      '<div class="flags"><label><input type="checkbox" data-k="visible"'+(p.visible!==false?" checked":"")+'> ظاهر في الموقع</label><label><input type="checkbox" data-k="soldOut"'+(p.soldOut?" checked":"")+'> نفدت الكمية</label></div>'+
+      '<div class="acts"><button type="button" class="ghost" data-act="edit">'+(open?"إغلاق":"تعديل")+'</button>'+
+      '<button type="button" class="ghost" data-act="up" aria-label="نقل لفوق">&uarr;</button><button type="button" class="ghost" data-act="down" aria-label="نقل لتحت">&darr;</button>'+
+      '<button type="button" class="ghost danger" data-act="del">'+(confirming?"تأكيد الحذف؟":"حذف")+'</button></div></div>';
+    if(open){
+      h+='<div class="form">'+
+        '<div class="f"><label for="f-name">اسم المنتج (بالإنجليزي)</label><input id="f-name" type="text" class="ltr" data-f="name" value="'+esc(p.name)+'"></div>'+
+        '<div class="f"><label for="f-cat">التصنيف</label><input id="f-cat" type="text" class="ltr" list="cats" data-f="category" value="'+esc(p.category)+'"></div>'+
+        '<div class="f"><label for="f-price">السعر ('+esc(data.store.currency)+')</label><input id="f-price" type="number" min="0" step="1" class="ltr" data-f="price" value="'+esc(p.price)+'"></div>'+
+        '<div class="f wide"><label for="f-desc">وصف قصير (بالإنجليزي)</label><textarea id="f-desc" class="ltr" data-f="desc">'+esc(p.desc)+'</textarea></div>'+
+        '<div class="f wide"><label>صور المنتج</label>'+galleryHtml(p)+'</div></div>';
+    }
+    return h+'</li>';
+  }
+  function renderProducts(){
+    $("plist").innerHTML=data.products.length?data.products.map(rowHtml).join(""):'<li class="banner">مفيش منتجات لسه. دوس "منتج جديد" وابدأ.</li>';
+    var cats=data.products.map(function(p){return p.category}).filter(function(v,i,a){return v&&a.indexOf(v)===i});
+    $("cats").innerHTML=cats.map(function(c){return '<option value="'+esc(c)+'">'}).join("");
+  }
+  function byId(id){return data.products.filter(function(p){return p.id===id})[0]}
+
+  $("plist").addEventListener("click",function(e){
+    var g=e.target.closest("button[data-g]");
+    if(g){
+      var p0=byId(g.closest(".prow").dataset.id),i0=Number(g.dataset.i),im=imgs(p0);
+      if(g.dataset.g==="del")im.splice(i0,1);
+      if(g.dataset.g==="main"&&i0>0)im.unshift(im.splice(i0,1)[0]);
+      setDirty(true);renderProducts();return;
+    }
+    var b=e.target.closest("button[data-act]");if(!b)return;
+    var id=b.closest(".prow").dataset.id,i=data.products.findIndex(function(p){return p.id===id}),a=b.dataset.act;
+    if(a==="edit"){openId=openId===id?null:id;renderProducts()}
+    if(a==="up"&&i>0){var t=data.products[i-1];data.products[i-1]=data.products[i];data.products[i]=t;setDirty(true);renderProducts()}
+    if(a==="down"&&i<data.products.length-1){var t2=data.products[i+1];data.products[i+1]=data.products[i];data.products[i]=t2;setDirty(true);renderProducts()}
+    if(a==="del"){
+      if(delId===id){data.products.splice(i,1);delId=null;if(openId===id)openId=null;setDirty(true);renderProducts()}
+      else{delId=id;renderProducts();setTimeout(function(){if(delId===id){delId=null;renderProducts()}},4000)}
+    }
+  });
+  $("plist").addEventListener("input",function(e){
+    var f=e.target.dataset.f;if(!f)return;
+    var row=e.target.closest(".prow"),p=byId(row.dataset.id);
+    p[f]=f==="price"?(Number(e.target.value)||0):e.target.value;
+    var map={name:"name",category:"cat",price:"price"};
+    if(map[f]){var el=row.querySelector('[data-s="'+map[f]+'"]');if(el)el.textContent=(f==="name"&&!p.name)?"(بدون اسم)":p[f]}
+    setDirty(true);
+  });
+  $("plist").addEventListener("change",function(e){
+    var row=e.target.closest(".prow");if(!row)return;
+    var p=byId(row.dataset.id);
+    if(e.target.dataset.k){p[e.target.dataset.k]=e.target.checked;setDirty(true)}
+    if(e.target.dataset.img&&e.target.files.length){
+      var files=[].slice.call(e.target.files).slice(0,MAXIMG-imgs(p).length);e.target.value="";
+      uploadMany(files,function(u){imgs(p).push(u);setDirty(true)}).then(renderProducts);
+    }
+  });
+  $("addP").addEventListener("click",function(){
+    var cat=data.products.length?data.products[data.products.length-1].category:"Necklaces";
+    var p={id:"p"+Date.now().toString(36),name:"New product",category:cat,price:0,images:[],desc:"",visible:true,soldOut:false};
+    data.products.push(p);openId=p.id;setDirty(true);tab="products";render();
+    var el=document.querySelector('[data-id="'+p.id+'"]');if(el)el.scrollIntoView({block:"center"});
+  });
+
+  /* ---------- images ---------- */
+  function shrink(file){
+    return new Promise(function(res,rej){
+      var url=URL.createObjectURL(file),im=new Image();
+      im.onload=function(){
+        var s=Math.min(1,1400/Math.max(im.width,im.height)),c=document.createElement("canvas");
+        c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+        var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function(b){b?res(b):rej(new Error("مقدرتش أقرأ الصورة دي."))},"image/jpeg",0.86);
+      };
+      im.onerror=function(){rej(new Error("الملف ده مش صورة مدعومة. جرّب JPG أو PNG."))};
+      im.src=url;
+    });
+  }
+  function b64(blob){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(String(r.result).split(",")[1])};r.onerror=rej;r.readAsDataURL(blob)})}
+  function upload(file){
+    return shrink(file).then(b64).then(function(d){return api("/api/upload",{name:file.name,data:d})}).then(function(r){
+      if(r.status===401){backToLogin("انتهت الجلسة. ادخل كلمة السر تاني.");throw new Error("انتهت الجلسة")}
+      if(r.status!==200||!r.body.url)throw new Error("الصورة ما اترفعتش: "+(r.body.error||"خطأ غير معروف")+". اتأكد إن Blob متفعّل على Vercel.");
+      return r.body.url;
+    });
+  }
+  // Uploads files one after another; each finished upload is handed to onUrl.
+  function uploadMany(files,onUrl){
+    var done=0;
+    return files.reduce(function(chain,f,i){
+      return chain.then(function(){
+        toast("بنرفع الصورة "+(i+1)+" من "+files.length+"...");
+        return upload(f).then(function(u){onUrl(u);done++}).catch(function(err){toast(err.message,true)});
+      });
+    },Promise.resolve()).then(function(){if(done)toast(done===1?"الصورة اترفعت. افتكر تدوس حفظ.":"اترفع "+done+" صور. افتكر تدوس حفظ.")});
+  }
+
+  /* ---------- appearance ---------- */
+  var T=function(){return data.store.theme};
+  function dots(p){return '<span class="dots"><i style="background:'+p.bg+'"></i><i style="background:'+p.accent+'"></i><i style="background:'+p.ink+'"></i></span>'}
+  function previewHtml(){
+    var items=data.products.filter(function(p){return p.visible!==false}).slice(0,3);
+    return '<div class="pv" id="pv"><div class="pv-bar">'+esc(data.store.name)+'</div><div class="pv-body">'+
+      '<small>'+esc(data.store.heroEyebrow)+'</small><h4>'+esc(data.store.heroTitle)+'</h4><p>'+esc(data.store.heroLead)+'</p><span class="pv-btn">Shop the collection</span>'+
+      '<div class="pv-cards">'+items.map(function(p){return '<div class="pv-card"><img src="'+esc(src(imgs(p)[0]||""))+'" alt=""><span>'+esc(p.name)+'</span><b>'+esc(p.price)+' '+esc(data.store.currency)+'</b></div>'}).join("")+'</div></div></div>';
+  }
+  function renderLook(){
+    var t=T();
+    Object.keys(Theme.FONTS).forEach(Theme.ensureFont);
+    var h=previewHtml()+
+    '<div class="group"><h3>ألوان جاهزة</h3><p class="hint">اختار واحدة وبعدين عدّل عليها زي ما تحب.</p><div class="opts">'+
+      Object.keys(Theme.PRESETS).map(function(k){var p=Theme.PRESETS[k];return '<button type="button" class="opt" data-preset="'+k+'" aria-pressed="'+(t.preset===k)+'">'+dots(p)+esc(p.label)+'</button>'}).join("")+'</div></div>'+
+    '<div class="group"><h3>ألوانك أنت</h3><p class="hint">لو غيّرت أي لون هيتحسب لون خاص بيك.</p><div class="colors">'+
+      [["bg","لون الخلفية",""],["ink","لون الكلام",""],["accent","لون التمييز","العناوين الصغيرة والتصنيفات"],["btn","لون الأزرار الكبيرة","زي Shop the collection"]].map(function(c){
+        return '<div class="c"><input type="color" id="c-'+c[0]+'" data-c="'+c[0]+'" value="'+t[c[0]]+'"><label for="c-'+c[0]+'">'+c[1]+(c[2]?'<small>'+c[2]+'</small>':'')+'</label></div>'}).join("")+'</div></div>'+
+    '<div class="group"><h3>شكل الخط</h3><div class="opts">'+
+      Object.keys(Theme.FONTS).map(function(k){var f=Theme.FONTS[k];return '<button type="button" class="opt fontopt" data-font="'+k+'" aria-pressed="'+(t.font===k)+'"><span class="s1" style="font-family:'+f.display+';font-weight:'+f.dw+'">Your name</span><span class="s2" style="font-family:'+f.body+'">'+esc(f.label)+'</span></button>'}).join("")+'</div></div>'+
+    '<div class="group"><h3>شكل الزوايا</h3><div class="opts">'+
+      [["sharp","حادة"],["soft","ناعمة"],["round","مدوّرة"]].map(function(c){return '<button type="button" class="opt" data-corners="'+c[0]+'" aria-pressed="'+(t.corners===c[0])+'">'+c[1]+'</button>'}).join("")+'</div></div>'+
+    '<div class="group"><h3>عدد المنتجات في الصف</h3><p class="hint">على الكمبيوتر. الموبايل بيعرض منتجين جنب بعض دايمًا.</p><div class="opts">'+
+      [2,3,4].map(function(n){return '<button type="button" class="opt" data-cols="'+n+'" aria-pressed="'+(t.cols===n)+'">'+n+'</button>'}).join("")+'</div></div>';
+    $("look").innerHTML=h;
+    Theme.apply(t,$("pv"));
+  }
+  $("look").addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;var t=T();
+    if(b.dataset.preset){var p=Theme.PRESETS[b.dataset.preset];t.preset=b.dataset.preset;t.bg=p.bg;t.ink=p.ink;t.accent=p.accent;t.btn=p.btn}
+    else if(b.dataset.font)t.font=b.dataset.font;
+    else if(b.dataset.corners)t.corners=b.dataset.corners;
+    else if(b.dataset.cols)t.cols=Number(b.dataset.cols);
+    else return;
+    setDirty(true);renderLook();
+  });
+  $("look").addEventListener("input",function(e){
+    var c=e.target.dataset.c;if(!c)return;
+    var t=T();t[c]=e.target.value;t.preset="";setDirty(true);
+    Theme.apply(t,$("pv"));
+    [].forEach.call($("look").querySelectorAll("[data-preset]"),function(x){x.setAttribute("aria-pressed","false")});
+  });
+
+  /* ---------- settings ---------- */
+  function renderSettings(){
+    var s=data.store,pk=s.perks||[];
+    function inp(id,key,label,opt){opt=opt||{};return '<div class="f'+(opt.wide?" wide":"")+'"><label for="'+id+'">'+label+'</label>'+
+      (opt.area?'<textarea id="'+id+'" class="ltr" data-s="'+key+'">'+esc(s[key])+'</textarea>':'<input id="'+id+'" type="text" class="ltr" data-s="'+key+'" value="'+esc(s[key])+'"'+(opt.inputmode?' inputmode="'+opt.inputmode+'"':"")+'>')+
+      (opt.hint?'<p class="hint">'+opt.hint+'</p>':"")+'</div>'}
+    var h='<h3>بيانات المتجر</h3>'+
+      inp("s-name","name","اسم المتجر")+
+      inp("s-wa","whatsapp","رقم واتساب لاستقبال الطلبات",{inputmode:"numeric",hint:"بالصيغة الدولية وبدون + أو مسافات. مثال لرقم مصري: 201001234567"})+
+      inp("s-cur","currency","العملة (بتظهر جنب الأسعار)")+
+      '<h3>أول الصفحة</h3>'+
+      inp("s-eb","heroEyebrow","سطر صغير فوق العنوان")+
+      inp("s-ti","heroTitle","العنوان الكبير")+
+      inp("s-le","heroLead","الجملة اللي تحت العنوان",{area:true,wide:true})+
+      inp("s-ca","heroCaption","وصف الصورة الكبيرة")+
+      '<div class="f"><label>الصورة الكبيرة</label><div class="imgblock">'+(s.heroImage?'<img class="thumb" src="'+esc(src(s.heroImage))+'" alt="">':'<div class="thumb">بدون صورة</div>')+
+      '<div><label class="ghost filebtn" for="s-img">تغيير الصورة</label><input id="s-img" class="file" type="file" accept="image/*" data-himg="1"></div></div></div>'+
+      '<h3>ثلاث مميزات تحت الصورة</h3><div class="f wide">'+[0,1,2].map(function(i){var p=pk[i]||["",""];
+        return '<div class="perk"><input type="text" class="ltr" aria-label="عنوان الميزة '+(i+1)+'" data-p="'+i+'-0" value="'+esc(p[0])+'"><input type="text" class="ltr" aria-label="تفاصيل الميزة '+(i+1)+'" data-p="'+i+'-1" value="'+esc(p[1])+'"></div>'}).join("")+'</div>';
+    $("settings").innerHTML=h;
+  }
+  $("settings").addEventListener("input",function(e){
+    var k=e.target.dataset.s,p=e.target.dataset.p;
+    if(k){data.store[k]=k==="whatsapp"?e.target.value.replace(/\D/g,""):e.target.value;setDirty(true)}
+    if(p){var ij=p.split("-"),pk=data.store.perks=data.store.perks||[];pk[ij[0]]=pk[ij[0]]||["",""];pk[ij[0]][ij[1]]=e.target.value;setDirty(true)}
+  });
+  $("settings").addEventListener("change",function(e){
+    if(e.target.dataset.himg&&e.target.files[0]){
+      var f=e.target.files[0];e.target.value="";
+      uploadMany([f],function(u){data.store.heroImage=u;setDirty(true)}).then(renderSettings);
+    }
+  });
+
+  /* ---------- tabs, save, boot ---------- */
+  function render(){
+    $("tabP").setAttribute("aria-pressed",tab==="products");$("tabL").setAttribute("aria-pressed",tab==="look");$("tabS").setAttribute("aria-pressed",tab==="settings");
+    $("viewP").hidden=tab!=="products";$("viewL").hidden=tab!=="look";$("viewS").hidden=tab!=="settings";
+    if(tab==="products")renderProducts();else if(tab==="look")renderLook();else renderSettings();
+  }
+  $("tabP").onclick=function(){tab="products";render()};
+  $("tabL").onclick=function(){tab="look";render()};
+  $("tabS").onclick=function(){tab="settings";render()};
+
+  $("save").addEventListener("click",function(){
+    if(data.products.some(function(p){return !String(p.name).trim()})){toast("اكتب اسم لكل منتج قبل الحفظ.",true);return}
+    $("save").disabled=true;toast("بنحفظ...");
+    api("/api/save",{store:data.store,products:data.products}).then(function(r){
+      if(r.status===401){backToLogin("انتهت الجلسة. ادخل كلمة السر تاني.");return}
+      if(r.status!==200){setDirty(true);toast("الحفظ فشل: "+(r.body.error||"خطأ غير معروف")+". اتأكد إن Blob متفعّل على Vercel.",true);return}
+      setDirty(false);$("banner").hidden=true;toast("اتحفظ. التعديلات هتظهر في الموقع خلال حوالي دقيقة.");
+    }).catch(function(){setDirty(true);toast("مفيش اتصال بالإنترنت. جرّب تاني.",true)});
+  });
+  $("logout").onclick=function(){try{sessionStorage.removeItem("bracelet-admin")}catch(e){}location.reload()};
+  window.addEventListener("beforeunload",function(e){if(dirty){e.preventDefault();e.returnValue=""}});
+
+  if(pw){login(pw).then(enter).catch(function(){backToLogin("")})}
+})();
+</script>
+</body>
+</html>
