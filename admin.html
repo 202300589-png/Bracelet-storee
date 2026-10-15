@@ -18,7 +18,7 @@
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px}
 [hidden]{display:none!important}
-button,input,textarea{font:inherit;color:inherit}
+button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .brand{font-family:var(--display);letter-spacing:.3em;text-transform:uppercase;font-weight:400}
@@ -30,7 +30,7 @@ button{cursor:pointer}
 .ghost:hover{border-color:var(--ink)}
 .danger{color:var(--bad);border-color:var(--bad)}
 label{display:block;font-size:14px;color:var(--mute);margin-bottom:4px}
-input[type=text],input[type=password],input[type=number],textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:9px 12px}
+input[type=text],input[type=password],input[type=number],textarea,select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:9px 12px}
 textarea{min-height:76px;resize:vertical}
 .ltr{direction:ltr;text-align:left}
 .hint{font-size:13px;color:var(--mute);margin:4px 0 0}
@@ -84,6 +84,22 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
 .imgblock{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 .imgblock .thumb{width:110px;height:110px}
 
+/* categories, shipping, payments tabs */
+.stack{display:grid;gap:18px}
+.rows{display:grid;gap:8px}
+.r{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.r .nm{flex:1 1 150px;min-width:0}
+.r input[type=number]{width:110px}
+.r .cb{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
+.r .hint{margin:0}
+.gov .nm b{display:block;font-weight:600}
+.gov .nm span{display:block;font-size:13px;color:var(--mute);direction:ltr;text-align:right}
+.payc{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.payc .top{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-weight:600}
+.payc .top label{margin:0;color:var(--ink)}
+.gold{color:var(--gold)}
+s{color:var(--mute)}
+
 /* appearance tab */
 .look{display:grid;gap:18px}
 .group{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
@@ -122,6 +138,7 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <script src="data/theme.js"></script>
+<script src="data/egypt.js"></script>
 <script src="data/default-store.js"></script>
 </head>
 <body>
@@ -151,6 +168,8 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
   <main>
     <div class="tabs" role="group" aria-label="الأقسام">
       <button type="button" id="tabP" aria-pressed="true">المنتجات</button>
+      <button type="button" id="tabD" aria-pressed="false">الأقسام والخصومات</button>
+      <button type="button" id="tabH" aria-pressed="false">الشحن والدفع</button>
       <button type="button" id="tabL" aria-pressed="false">الشكل والألوان</button>
       <button type="button" id="tabS" aria-pressed="false">إعدادات المتجر</button>
     </div>
@@ -159,7 +178,16 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
     <section id="viewP">
       <div class="sec-head"><h2>المنتجات</h2><button class="btn" type="button" id="addP">+ منتج جديد</button></div>
       <ul id="plist"></ul>
-      <datalist id="cats"></datalist>
+    </section>
+
+    <section id="viewD" hidden>
+      <div class="sec-head"><h2>الأقسام والخصومات</h2></div>
+      <div class="stack" id="cats"></div>
+    </section>
+
+    <section id="viewH" hidden>
+      <div class="sec-head"><h2>الشحن والدفع</h2></div>
+      <div class="stack" id="ship"></div>
     </section>
 
     <section id="viewL" hidden>
@@ -212,9 +240,15 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
   function enter(){
     return fetch("/api/store?fresh=1",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(d){
       var saved=d&&d.store&&Array.isArray(d.products);
-      data=saved?{store:Object.assign({},DEF.store,d.store),products:d.products}:JSON.parse(JSON.stringify(DEF));
-      data.store.theme=Theme.normalize(data.store.theme);
-      data.products.forEach(imgs);
+      data=JSON.parse(JSON.stringify(saved?{store:Object.assign({},DEF.store,d.store),products:d.products}:DEF));
+      var st=data.store;
+      st.theme=Theme.normalize(st.theme);
+      data.products.forEach(function(p){imgs(p);p.salePrice=Number(p.salePrice)||0});
+      st.announcement=st.announcement||"";st.freeShippingOver=Number(st.freeShippingOver)||0;
+      st.shipping=Object.assign({},DEF.store.shipping,st.shipping||{});
+      st.payments=DEF.store.payments.map(function(dp){return Object.assign({},dp,(Array.isArray(st.payments)?st.payments:[]).filter(function(x){return x&&x.id===dp.id})[0])});
+      st.categories=(Array.isArray(st.categories)?st.categories:[]).filter(function(c){return c&&c.name});
+      data.products.forEach(function(p){if(p.category&&!st.categories.some(function(c){return c.name.toLowerCase()===p.category.toLowerCase()}))st.categories.push({name:p.category,show:true})});
       $("banner").hidden=saved;
       $("login").hidden=true;$("app").hidden=false;
       setDirty(false);openId=null;render();
@@ -231,10 +265,19 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
     var add=imgs(p).length<MAXIMG?'<label class="ghost filebtn" for="f-img">+ إضافة صور</label><input id="f-img" class="file" type="file" accept="image/*" multiple data-img="1">':'<p class="hint">وصلت للحد الأقصى ('+MAXIMG+' صور).</p>';
     return '<div class="gal">'+g+'</div>'+add+'<p class="hint">أول صورة هي اللي بتظهر على كارت المنتج. تقدر تختار أكتر من صورة مرة واحدة، وبتتصغّر تلقائيًا قبل الرفع.</p>';
   }
+  function priceSub(p){
+    var c=esc(data.store.currency);
+    return p.salePrice>0&&p.salePrice<p.price?'<s>'+esc(p.price)+'</s> <b class="gold">'+esc(p.salePrice)+'</b> '+c+' <span class="gold">(-'+Math.round((1-p.salePrice/p.price)*100)+'%)</span>':'<b>'+esc(p.price)+'</b> '+c;
+  }
+  function catSelect(p){
+    var names=data.store.categories.map(function(c){return c.name});
+    if(p.category&&names.indexOf(p.category)<0)names.push(p.category);
+    return '<select id="f-cat" class="ltr" data-f="category">'+names.map(function(n){return '<option value="'+esc(n)+'"'+(n===p.category?' selected':'')+'>'+esc(n)+'</option>'}).join("")+'</select>';
+  }
   function rowHtml(p){
     var open=p.id===openId,confirming=p.id===delId,n=imgs(p).length;
     var h='<li class="prow" data-id="'+esc(p.id)+'"><div class="head">'+thumb(p)+
-      '<div class="meta"><strong data-s="name">'+esc(p.name||"(بدون اسم)")+'</strong><span class="sub"><span data-s="cat" class="ltr">'+esc(p.category)+'</span><span class="ltr"><b data-s="price">'+esc(p.price)+'</b> '+esc(data.store.currency)+'</span><span>'+n+' صور</span></span></div>'+
+      '<div class="meta"><strong data-s="name">'+esc(p.name||"(بدون اسم)")+'</strong><span class="sub"><span data-s="cat" class="ltr">'+esc(p.category)+'</span><span class="ltr" data-s="prices">'+priceSub(p)+'</span><span>'+n+' صور</span></span></div>'+
       '<div class="flags"><label><input type="checkbox" data-k="visible"'+(p.visible!==false?" checked":"")+'> ظاهر في الموقع</label><label><input type="checkbox" data-k="soldOut"'+(p.soldOut?" checked":"")+'> نفدت الكمية</label></div>'+
       '<div class="acts"><button type="button" class="ghost" data-act="edit">'+(open?"إغلاق":"تعديل")+'</button>'+
       '<button type="button" class="ghost" data-act="up" aria-label="نقل لفوق">&uarr;</button><button type="button" class="ghost" data-act="down" aria-label="نقل لتحت">&darr;</button>'+
@@ -242,17 +285,17 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
     if(open){
       h+='<div class="form">'+
         '<div class="f"><label for="f-name">اسم المنتج (بالإنجليزي)</label><input id="f-name" type="text" class="ltr" data-f="name" value="'+esc(p.name)+'"></div>'+
-        '<div class="f"><label for="f-cat">التصنيف</label><input id="f-cat" type="text" class="ltr" list="cats" data-f="category" value="'+esc(p.category)+'"></div>'+
+        '<div class="f"><label for="f-cat">القسم</label>'+catSelect(p)+'<p class="hint">الأقسام بتتعدل من تبويب "الأقسام والخصومات".</p></div>'+
         '<div class="f"><label for="f-price">السعر ('+esc(data.store.currency)+')</label><input id="f-price" type="number" min="0" step="1" class="ltr" data-f="price" value="'+esc(p.price)+'"></div>'+
+        '<div class="f"><label for="f-sale">سعر بعد الخصم (اختياري)</label><input id="f-sale" type="number" min="0" step="1" class="ltr" data-f="salePrice" value="'+esc(p.salePrice||0)+'"><p class="hint">سيبه 0 لو مفيش خصم. لازم يكون أقل من السعر الأصلي.</p></div>'+
         '<div class="f wide"><label for="f-desc">وصف قصير (بالإنجليزي)</label><textarea id="f-desc" class="ltr" data-f="desc">'+esc(p.desc)+'</textarea></div>'+
+        '<div class="f wide"><label for="f-inc">لو ده باندل: بيشمل إيه؟ (اختياري)</label><input id="f-inc" type="text" class="ltr" data-f="includes" placeholder="Ring + Chain + Bracelet" value="'+esc(p.includes||"")+'"><p class="hint">مثال: باندل فيه خاتم وسلسلة وإنسيال. اعمله منتج عادي، اختار له قسم Bundles، وحط له صور وسعر (وسعر خصم لو عايز). السطر ده بيظهر للعميل تحت الوصف.</p></div>'+
         '<div class="f wide"><label>صور المنتج</label>'+galleryHtml(p)+'</div></div>';
     }
     return h+'</li>';
   }
   function renderProducts(){
     $("plist").innerHTML=data.products.length?data.products.map(rowHtml).join(""):'<li class="banner">مفيش منتجات لسه. دوس "منتج جديد" وابدأ.</li>';
-    var cats=data.products.map(function(p){return p.category}).filter(function(v,i,a){return v&&a.indexOf(v)===i});
-    $("cats").innerHTML=cats.map(function(c){return '<option value="'+esc(c)+'">'}).join("");
   }
   function byId(id){return data.products.filter(function(p){return p.id===id})[0]}
 
@@ -277,9 +320,10 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
   $("plist").addEventListener("input",function(e){
     var f=e.target.dataset.f;if(!f)return;
     var row=e.target.closest(".prow"),p=byId(row.dataset.id);
-    p[f]=f==="price"?(Number(e.target.value)||0):e.target.value;
-    var map={name:"name",category:"cat",price:"price"};
+    p[f]=(f==="price"||f==="salePrice")?Math.max(0,Number(e.target.value)||0):e.target.value;
+    var map={name:"name",category:"cat"};
     if(map[f]){var el=row.querySelector('[data-s="'+map[f]+'"]');if(el)el.textContent=(f==="name"&&!p.name)?"(بدون اسم)":p[f]}
+    if(f==="price"||f==="salePrice"){var pe=row.querySelector('[data-s="prices"]');if(pe)pe.innerHTML=priceSub(p)}
     setDirty(true);
   });
   $("plist").addEventListener("change",function(e){
@@ -292,8 +336,8 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
     }
   });
   $("addP").addEventListener("click",function(){
-    var cat=data.products.length?data.products[data.products.length-1].category:"Necklaces";
-    var p={id:"p"+Date.now().toString(36),name:"New product",category:cat,price:0,images:[],desc:"",visible:true,soldOut:false};
+    var cat=data.products.length?data.products[data.products.length-1].category:(data.store.categories[0]||{name:"Necklaces"}).name;
+    var p={id:"p"+Date.now().toString(36),name:"New product",category:cat,price:0,salePrice:0,images:[],desc:"",visible:true,soldOut:false};
     data.products.push(p);openId=p.id;setDirty(true);tab="products";render();
     var el=document.querySelector('[data-id="'+p.id+'"]');if(el)el.scrollIntoView({block:"center"});
   });
@@ -408,18 +452,123 @@ main{max-width:960px;margin-inline:auto;padding-block:20px 80px}
     }
   });
 
-  /* ---------- tabs, save, boot ---------- */
-  function render(){
-    $("tabP").setAttribute("aria-pressed",tab==="products");$("tabL").setAttribute("aria-pressed",tab==="look");$("tabS").setAttribute("aria-pressed",tab==="settings");
-    $("viewP").hidden=tab!=="products";$("viewL").hidden=tab!=="look";$("viewS").hidden=tab!=="settings";
-    if(tab==="products")renderProducts();else if(tab==="look")renderLook();else renderSettings();
+  /* ---------- categories and discounts ---------- */
+  var CS=function(){return data.store.categories};
+  function renderCats(){
+    var s=data.store;
+    var h='<div class="group"><h3>شريط إعلان فوق الموقع</h3><p class="hint">جملة قصيرة بتظهر في أول الصفحة (مثلًا: Free delivery this week). سيبها فاضية لو مش عايز شريط.</p>'+
+      '<input type="text" class="ltr" id="a-ann" data-ann="1" aria-label="نص الإعلان" value="'+esc(s.announcement)+'"></div>'+
+    '<div class="group"><h3>الأقسام</h3><p class="hint">كل قسم بيظهر كزرار فوق المنتجات. قسم Men\'s Silver جاهز، ولما تضيف له منتجات هتظهر لوحدها. لو القسم ما فيهوش منتجات الزائر بيشوف "قريبًا".</p><div class="rows">'+
+      CS().map(function(c,i){
+        var all=data.products.filter(function(p){return p.category===c.name}),on=all.filter(function(p){return p.salePrice>0&&p.salePrice<p.price}).length;
+        return '<div class="r" data-i="'+i+'"><div class="nm"><input type="text" class="ltr" aria-label="اسم القسم" data-cn="1" data-orig="'+esc(c.name)+'" value="'+esc(c.name)+'"></div>'+
+          '<label class="cb"><input type="checkbox" data-cs="1"'+(c.show!==false?" checked":"")+'> ظاهر</label>'+
+          '<span class="hint">'+all.length+' منتج'+(on?" ، "+on+" عليهم خصم":"")+'</span>'+
+          '<div class="acts"><button type="button" class="ghost" data-ca="up" aria-label="نقل لفوق">&uarr;</button><button type="button" class="ghost" data-ca="down" aria-label="نقل لتحت">&darr;</button><button type="button" class="ghost danger" data-ca="del">حذف</button></div></div>'}).join("")+
+      '</div><p style="margin:12px 0 0"><button type="button" class="ghost" id="addCat">+ قسم جديد</button></p></div>'+
+    '<div class="group"><h3>خصومات (Sale)</h3><p class="hint">اكتب النسبة وادوس "طبّق" وهيتحسب سعر الخصم لكل منتج في القسم (بيتقرب لأقرب جنيه). تقدر بعدها تعدّل سعر منتج بعينه من تبويب المنتجات. افتكر تدوس حفظ.</p><div class="rows">'+
+      [{n:"كل المنتجات",i:-1}].concat(CS().map(function(c,i){return {n:c.name,i:i}})).map(function(x){
+        return '<div class="r" data-d="'+x.i+'"><b class="nm'+(x.i<0?"":" ltr")+'">'+esc(x.n)+'</b><input type="number" min="1" max="90" step="1" class="ltr" placeholder="%" aria-label="نسبة الخصم لـ '+esc(x.n)+'" data-pct="1">'+
+          '<button type="button" class="ghost" data-disc="apply">طبّق الخصم</button><button type="button" class="ghost" data-disc="clear">شيل الخصم</button></div>'}).join("")+'</div></div>';
+    $("cats").innerHTML=h;
   }
-  $("tabP").onclick=function(){tab="products";render()};
-  $("tabL").onclick=function(){tab="look";render()};
-  $("tabS").onclick=function(){tab="settings";render()};
+  $("cats").addEventListener("input",function(e){
+    var t=e.target;
+    if(t.dataset.ann){data.store.announcement=t.value;setDirty(true);return}
+    if(t.dataset.cn){var c=CS()[Number(t.closest(".r").dataset.i)],old=c.name;data.products.forEach(function(p){if(p.category===old)p.category=t.value});c.name=t.value;setDirty(true)}
+  });
+  $("cats").addEventListener("change",function(e){
+    var t=e.target,i=t.closest(".r")?Number(t.closest(".r").dataset.i):-1;
+    if(t.dataset.cs){CS()[i].show=t.checked;setDirty(true)}
+    if(t.dataset.cn){
+      var c=CS()[i],v=t.value.trim(),orig=t.dataset.orig,dup=CS().some(function(x,j){return j!==i&&x.name.toLowerCase()===v.toLowerCase()});
+      if(!v||dup){data.products.forEach(function(p){if(p.category===c.name)p.category=orig});c.name=orig;toast(!v?"اسم القسم مينفعش يبقى فاضي.":"في قسم بنفس الاسم ده.",true)}
+      else{data.products.forEach(function(p){if(p.category===c.name)p.category=v});c.name=v}
+      renderCats();
+    }
+  });
+  $("cats").addEventListener("click",function(e){
+    if(e.target.id==="addCat"){
+      var n="New category",k=1;while(CS().some(function(c){return c.name===n}))n="New category "+(++k);
+      CS().push({name:n,show:true});setDirty(true);renderCats();return;
+    }
+    var b=e.target.closest("button");if(!b)return;
+    var row=b.closest(".r");if(!row)return;
+    if(b.dataset.ca){
+      var i=Number(row.dataset.i),cs=CS();
+      if(b.dataset.ca==="up"&&i>0){var a=cs[i-1];cs[i-1]=cs[i];cs[i]=a;setDirty(true);renderCats()}
+      if(b.dataset.ca==="down"&&i<cs.length-1){var z=cs[i+1];cs[i+1]=cs[i];cs[i]=z;setDirty(true);renderCats()}
+      if(b.dataset.ca==="del"){
+        if(data.products.some(function(p){return p.category===cs[i].name})){toast("فيه منتجات في القسم ده. انقلها لقسم تاني الأول أو اعمل القسم غير ظاهر.",true);return}
+        cs.splice(i,1);setDirty(true);renderCats();
+      }
+      return;
+    }
+    if(b.dataset.disc){
+      var di=Number(row.dataset.d),targets=data.products.filter(function(p){return di<0||p.category===CS()[di].name});
+      if(!targets.length){toast("مفيش منتجات هنا.",true);return}
+      if(b.dataset.disc==="clear"){targets.forEach(function(p){p.salePrice=0});setDirty(true);renderCats();toast("اتشال الخصم من "+targets.length+" منتج. دوس حفظ.");return}
+      var pct=Number(row.querySelector("[data-pct]").value);
+      if(!(pct>=1&&pct<=90)){toast("اكتب نسبة من 1 لـ 90.",true);return}
+      var n=0;targets.forEach(function(p){var v=Math.round(p.price*(1-pct/100));p.salePrice=(v>0&&v<p.price)?v:0;if(p.salePrice)n++});
+      setDirty(true);renderCats();toast("اتطبق خصم "+pct+"% على "+n+" منتج. دوس حفظ.");
+    }
+  });
+
+  /* ---------- shipping and payments ---------- */
+  function renderShip(){
+    var s=data.store;
+    var h='<div class="group"><h3>الشحن المجاني</h3><p class="hint">لو إجمالي المنتجات وصل للمبلغ ده التوصيل يبقى مجاني. اكتب 0 لو مش عايز شحن مجاني.</p>'+
+      '<div style="max-width:220px"><label for="sh-free">المبلغ ('+esc(s.currency)+')</label><input id="sh-free" type="number" min="0" step="1" class="ltr" data-free="1" value="'+esc(s.freeShippingOver)+'"></div></div>'+
+    '<div class="group"><h3>سعر التوصيل لكل محافظة</h3><p class="hint">الأسعار الموجودة دلوقتي أسعار مبدئية، عدّلها حسب شركة الشحن بتاعتك. علّم "مفيش توصيل" على أي محافظة مش بتوصللها.</p>'+
+      '<div class="r" style="margin-bottom:10px"><div class="nm"><label for="sh-all">سعر واحد لكل المحافظات</label></div><input id="sh-all" type="number" min="0" step="1" class="ltr"><button type="button" class="ghost" data-shall="1">طبّق على الكل</button></div>'+
+      '<div class="rows">'+EGYPT.map(function(g){
+        var v=s.shipping[g.id],no=v===null;
+        return '<div class="r gov" data-gid="'+g.id+'"><div class="nm"><b>'+esc(g.ar)+'</b><span>'+esc(g.en)+'</span></div>'+
+          '<input type="number" min="0" step="1" class="ltr" aria-label="سعر التوصيل '+esc(g.ar)+'" data-ship="1" value="'+(no?"":esc(v))+'"'+(no?" disabled":"")+'>'+
+          '<label class="cb"><input type="checkbox" data-noship="1"'+(no?" checked":"")+'> مفيش توصيل</label></div>'}).join("")+'</div></div>'+
+    '<div class="group"><h3>طرق الدفع</h3><p class="hint">اللي مفعّلة هتظهر للعميل في السلة وفي أسفل الموقع. الموقع نفسه مش بيستلم فلوس: الطلب بيتبعت لك على واتساب. اكتب في الملاحظة اللي حابب العميل يعرفه، واتأكد إنها بتعبّر عن اللي بتعمله فعلًا.</p><div class="rows">'+
+      s.payments.map(function(p){
+        return '<div class="payc" data-pid="'+p.id+'"><div class="top"><input type="checkbox" id="pe-'+p.id+'" data-pf="enabled"'+(p.enabled!==false?" checked":"")+'><label for="pe-'+p.id+'">'+({cash:"كاش عند الاستلام",visa:"ڤيزا",instapay:"انستا باي"})[p.id]+'</label></div>'+
+          '<div><label for="pl-'+p.id+'">الاسم اللي بيظهر</label><input id="pl-'+p.id+'" type="text" class="ltr" data-pf="label" value="'+esc(p.label)+'"></div>'+
+          (p.id==="instapay"?'<div><label for="ph-'+p.id+'">عنوان انستا باي بتاعك</label><input id="ph-'+p.id+'" type="text" class="ltr" data-pf="handle" value="'+esc(p.handle)+'"></div>':'')+
+          '<div style="grid-column:1/-1"><label for="pn-'+p.id+'">ملاحظة بتظهر للعميل</label><textarea id="pn-'+p.id+'" class="ltr" data-pf="note">'+esc(p.note)+'</textarea></div></div>'}).join("")+'</div></div>';
+    $("ship").innerHTML=h;
+  }
+  $("ship").addEventListener("input",function(e){
+    var t=e.target,s=data.store;
+    if(t.dataset.free){s.freeShippingOver=Math.max(0,Math.round(Number(t.value)||0));setDirty(true)}
+    if(t.dataset.ship){s.shipping[t.closest(".r").dataset.gid]=Math.max(0,Math.round(Number(t.value)||0));setDirty(true)}
+    if(t.dataset.pf&&t.type!=="checkbox"){var p=s.payments.filter(function(x){return x.id===t.closest(".payc").dataset.pid})[0];p[t.dataset.pf]=t.value;setDirty(true)}
+  });
+  $("ship").addEventListener("change",function(e){
+    var t=e.target,s=data.store;
+    if(t.dataset.noship){
+      var id=t.closest(".r").dataset.gid;
+      s.shipping[id]=t.checked?null:(DEF.store.shipping[id]||0);setDirty(true);renderShip();
+    }
+    if(t.dataset.pf==="enabled"){var p=s.payments.filter(function(x){return x.id===t.closest(".payc").dataset.pid})[0];p.enabled=t.checked;setDirty(true)}
+  });
+  $("ship").addEventListener("click",function(e){
+    if(!e.target.dataset.shall)return;
+    var v=$("sh-all").value;
+    if(v===""||!(Number(v)>=0)){toast("اكتب السعر الأول.",true);return}
+    var n=Math.round(Number(v));EGYPT.forEach(function(g){data.store.shipping[g.id]=n});
+    setDirty(true);renderShip();toast("اتحط "+n+" لكل المحافظات. دوس حفظ.");
+  });
+
+  /* ---------- tabs, save, boot ---------- */
+  var TABS={products:["tabP","viewP",renderProducts],cats:["tabD","viewD",renderCats],ship:["tabH","viewH",renderShip],look:["tabL","viewL",renderLook],settings:["tabS","viewS",renderSettings]};
+  function render(){
+    Object.keys(TABS).forEach(function(k){var t=TABS[k];$(t[0]).setAttribute("aria-pressed",tab===k);$(t[1]).hidden=tab!==k});
+    TABS[tab][2]();
+  }
+  Object.keys(TABS).forEach(function(k){$(TABS[k][0]).onclick=function(){tab=k;render()}});
 
   $("save").addEventListener("click",function(){
     if(data.products.some(function(p){return !String(p.name).trim()})){toast("اكتب اسم لكل منتج قبل الحفظ.",true);return}
+    var bad=data.products.filter(function(p){return p.salePrice>0&&p.salePrice>=p.price})[0];
+    if(bad){toast("سعر الخصم لازم يكون أقل من السعر الأصلي في: "+bad.name,true);return}
     $("save").disabled=true;toast("بنحفظ...");
     api("/api/save",{store:data.store,products:data.products}).then(function(r){
       if(r.status===401){backToLogin("انتهت الجلسة. ادخل كلمة السر تاني.");return}

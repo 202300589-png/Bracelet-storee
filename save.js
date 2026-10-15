@@ -8,6 +8,7 @@ const img = (v) => {
   return /^(img\/|https:\/\/)/.test(v) ? v : '';
 };
 
+const num = (v, max) => Math.min(max, Math.max(0, Math.round(Number(v) || 0)));
 const hex = (v, fallback) => (/^#[0-9a-fA-F]{6}$/.test(String(v)) ? String(v).toLowerCase() : fallback);
 const oneOf = (v, list, fallback) => (list.includes(v) ? v : fallback);
 
@@ -26,6 +27,40 @@ function cleanTheme(t) {
   };
 }
 
+// Delivery fee per governorate id. null means "we do not deliver there".
+function cleanShipping(s) {
+  const out = {};
+  if (s && typeof s === 'object') {
+    Object.keys(s).slice(0, 40).forEach((k) => {
+      if (!/^[a-z-]{2,24}$/.test(k)) return;
+      out[k] = s[k] === null || s[k] === '' || s[k] === false ? null : num(s[k], 100000);
+    });
+  }
+  return out;
+}
+
+const PAY = [['cash', 'Cash on delivery'], ['visa', 'Visa / bank card'], ['instapay', 'InstaPay']];
+function cleanPayments(list) {
+  const by = {};
+  (Array.isArray(list) ? list : []).forEach((p) => { if (p && typeof p.id === 'string') by[p.id] = p; });
+  return PAY.map(([id, label]) => {
+    const p = by[id] || {};
+    return { id, enabled: p.enabled !== false, label: str(p.label, 30) || label, note: str(p.note, 200), handle: id === 'instapay' ? str(p.handle, 80) : '' };
+  });
+}
+
+function cleanCategories(list) {
+  const seen = new Set();
+  const out = [];
+  (Array.isArray(list) ? list : []).slice(0, 20).forEach((c) => {
+    const name = str(c && typeof c === 'object' ? c.name : c, 30);
+    if (!name || seen.has(name.toLowerCase())) return;
+    seen.add(name.toLowerCase());
+    out.push({ name, show: !(c && c.show === false) });
+  });
+  return out;
+}
+
 function clean(d) {
   const s = d.store || {};
   const store = {
@@ -37,6 +72,11 @@ function clean(d) {
     heroLead: str(s.heroLead, 300),
     heroImage: img(s.heroImage),
     heroCaption: str(s.heroCaption, 80),
+    announcement: str(s.announcement, 120),
+    freeShippingOver: num(s.freeShippingOver, 1000000),
+    categories: cleanCategories(s.categories),
+    shipping: cleanShipping(s.shipping),
+    payments: cleanPayments(s.payments),
     theme: cleanTheme(s.theme),
     perks: (Array.isArray(s.perks) ? s.perks : []).slice(0, 3).map((p) => [
       str(p && p[0], 40),
@@ -51,14 +91,18 @@ function clean(d) {
     seen.add(id);
     let images = (Array.isArray(p.images) ? p.images : []).map(img).filter(Boolean).slice(0, 8);
     if (!images.length && img(p.image)) images = [img(p.image)];
+    const price = num(p.price, 10000000);
+    const sale = num(p.salePrice, 10000000);
     return {
       id,
       name: str(p.name, 80),
       category: str(p.category, 30) || 'Other',
-      price: Math.max(0, Math.round(Number(p.price) || 0)),
+      price,
+      salePrice: sale > 0 && sale < price ? sale : 0,
       images,
       image: images[0] || '',
       desc: str(p.desc, 200),
+      includes: str(p.includes, 120),
       visible: p.visible !== false,
       soldOut: !!p.soldOut,
     };

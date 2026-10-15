@@ -6,8 +6,9 @@
 <title>Bracelet</title>
 <meta name="description" content="Arabic name jewelry: pendants, necklaces and rings made to order.">
 <style>
-/* Layout: sticky wordmark bar, split hero (type left, photo right), product grid (2 columns on phones, 2 to 4 on desktop),
-   product dialog with a photo gallery, slide-in cart. Colors, fonts, corners and columns come from the saved theme. */
+/* Layout: announcement bar, sticky wordmark bar, split hero, category chips, product grid (2 columns on phones, 2 to 4 on desktop),
+   product dialog with photo gallery, slide-in cart that also holds delivery details and payment choice.
+   Colors, fonts, corners and columns come from the saved theme. */
 :root{
   --bg:#0b1426; --ink:#ede8dc; --gold:#d2ae5c; --btn-bg:#d2ae5c; --btn-fg:#111111; --accent-fill:#d2ae5c; --accent-fg:#111111;
   --card:#1a2336; --line:#313b4d; --mute:#a5a9b0;
@@ -17,7 +18,7 @@
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px}
 .wrap{max-width:1120px;margin-inline:auto}
-button,input,textarea{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 a{color:inherit}
 img{max-width:100%}
@@ -26,7 +27,8 @@ img{max-width:100%}
 h1,h2,h3{font-family:var(--display);font-weight:var(--dw);margin:0;text-wrap:balance}
 .pending main{visibility:hidden}
 
-/* header */
+/* announcement + header */
+.announce{margin-inline:-16px;background:var(--accent-fill);color:var(--accent-fg);text-align:center;padding:8px 16px;font-size:14px;letter-spacing:.06em}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-16px;padding:14px 16px}
 header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .mark{font-family:var(--display);font-weight:var(--dw);font-size:26px;letter-spacing:.32em;text-transform:uppercase;text-decoration:none}
@@ -64,18 +66,28 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1
 .item .ph:hover img{transform:scale(1.03)}
 .item.out .ph img{opacity:.5}
 .count{position:absolute;inset-inline-end:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:2px 9px;border-radius:999px;font-variant-numeric:tabular-nums}
+.badge{position:absolute;inset-inline-start:8px;top:8px;background:var(--accent-fill);color:var(--accent-fg);font-size:12px;font-weight:600;letter-spacing:.06em;padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
 .item .cat{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-top:12px}
 .item h3{font-size:21px;line-height:1.2;margin-top:2px}
 .titlebtn{background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.inc{color:var(--ink)!important}
 .item .desc{font-size:14px;color:var(--mute);margin:4px 0 0}
 .item .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:12px;flex-wrap:wrap}
 .price{font-variant-numeric:tabular-nums;font-weight:500}
+.price s{color:var(--mute);font-weight:400;margin-inline-end:6px}
+.price .now{color:var(--gold)}
 .add{background:transparent;border:1px solid var(--ink);border-radius:var(--radius);padding:7px 14px;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
 .add:hover:not([disabled]),.add.done{background:var(--ink);color:var(--bg)}
 .add[disabled]{opacity:.5;cursor:not-allowed}
-.empty-shop{color:var(--mute);padding-bottom:72px}
+.empty-shop{grid-column:1/-1;color:var(--mute);padding-bottom:24px}
 
-footer{border-top:1px solid var(--line);padding-block:28px 40px;color:var(--mute);font-size:14px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
+footer{border-top:1px solid var(--line);padding-block:28px 96px;color:var(--mute);font-size:14px;display:grid;gap:14px}
+footer .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:3px 12px;color:var(--ink);font-size:13px}
+
+/* floating WhatsApp button */
+.wa{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:4;background:var(--btn-bg);color:var(--btn-fg);border-radius:999px;padding:10px 16px;display:flex;gap:8px;align-items:center;text-decoration:none;font-size:14px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.wa svg{width:18px;height:18px;flex:none}
 
 /* product dialog */
 #pm{position:fixed;inset:0;z-index:12;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:16px}
@@ -97,15 +109,15 @@ footer{border-top:1px solid var(--line);padding-block:28px 40px;color:var(--mute
 .pm-info .add{align-self:flex-start;padding:11px 22px}
 #pmx{position:absolute;top:6px;right:8px;z-index:2;background:rgba(0,0,0,.45);color:#fff;width:36px;height:36px;border-radius:50%;border:0;font-size:24px;line-height:1}
 
-/* cart */
+/* cart and checkout */
 #shade{position:fixed;inset:0;background:rgba(5,10,22,.5);opacity:0;visibility:hidden;transition:opacity .2s;z-index:9}
 #shade.on{opacity:1;visibility:visible}
-#cart{position:fixed;z-index:13;top:0;bottom:0;right:0;width:min(420px,100%);background:var(--bg);border-left:1px solid var(--line);transform:translateX(105%);visibility:hidden;transition:transform .25s,visibility .25s;display:flex;flex-direction:column;padding:18px 20px calc(18px + env(safe-area-inset-bottom,0px))}
+#cart{position:fixed;z-index:13;top:0;bottom:0;right:0;width:min(440px,100%);background:var(--bg);border-left:1px solid var(--line);transform:translateX(105%);visibility:hidden;transition:transform .25s,visibility .25s;display:flex;flex-direction:column;padding:18px 20px calc(14px + env(safe-area-inset-bottom,0px))}
 #cart.on{transform:none;visibility:visible}
 .cart-top{display:flex;justify-content:space-between;align-items:center}
 .cart-top h2{font-size:28px}
 .x{background:none;border:0;font-size:28px;line-height:1;padding:4px 8px}
-#lines{flex:1;overflow:auto;min-height:0;margin-block:10px}
+.cart-body{flex:1;overflow:auto;min-height:0;margin-block:6px 10px;padding-inline-end:2px}
 .line{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line)}
 .line img{width:64px;height:64px;object-fit:cover;display:block;border-radius:var(--radius);background:var(--card)}
 .line .t{font-size:15px;line-height:1.3}
@@ -113,15 +125,30 @@ footer{border-top:1px solid var(--line);padding-block:28px 40px;color:var(--mute
 .qty{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
 .qty button{width:28px;height:28px;border:1px solid var(--line);background:transparent;border-radius:50%;line-height:1}
 .none{color:var(--mute);padding-block:28px}
-.engrave label{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
-.engrave input{width:100%;background:var(--card);border:1px solid var(--line);padding:10px 12px;border-radius:var(--radius)}
-.sum{display:flex;justify-content:space-between;font-size:18px;padding-block:14px 12px;font-variant-numeric:tabular-nums}
+.co h3{font-size:20px;margin:20px 0 10px}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:6px}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--card);border:1px solid var(--line);padding:10px 12px;border-radius:var(--radius)}
+.fld textarea{min-height:72px;resize:vertical}
+.pay{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.pay.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.pay input{accent-color:var(--gold);width:18px;height:18px;margin:0}
+.paynote{font-size:14px;color:var(--mute);margin:4px 0 0}
+.handle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;color:var(--ink)}
+.handle code{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:4px 10px;font-size:15px;overflow-wrap:anywhere}
+.handle button{background:transparent;border:1px solid var(--line);border-radius:var(--radius);padding:4px 12px;font-size:13px}
+.cart-foot{border-top:1px solid var(--line);padding-top:10px}
+.sumrow{display:flex;justify-content:space-between;gap:12px;font-size:15px;font-variant-numeric:tabular-nums;padding-block:2px}
+.sumrow.total{font-size:19px;font-weight:500;padding-block:6px 4px}
+.sumrow span:first-child{color:var(--mute)}.sumrow.total span:first-child{color:var(--ink)}
+.need{font-size:13px;color:var(--gold);min-height:1.4em;margin:2px 0 6px}
 .send{display:block;text-align:center}
 .send[aria-disabled="true"]{opacity:.4;pointer-events:none}
-.note{font-size:13px;color:var(--mute);margin:10px 0 0}
+.note{font-size:12px;color:var(--mute);margin:8px 0 0}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <script src="data/theme.js"></script>
+<script src="data/egypt.js"></script>
 <script src="data/default-store.js"></script>
 <script>
 /* Apply the last saved look right away so the page does not flash the wrong colors. */
@@ -130,6 +157,7 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
 </head>
 <body class="pending">
 
+<div class="announce" id="announce" hidden></div>
 <header><div class="wrap">
   <a class="mark" href="#top" id="top">Bracelet</a>
   <button class="cart-open" id="open" aria-label="Open cart">Cart <b id="cnt">0</b></button>
@@ -157,7 +185,15 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
   </section>
 </main>
 
-<footer class="wrap"><span id="foot"></span><span>Order by WhatsApp</span></footer>
+<footer class="wrap">
+  <div class="row" id="accept"></div>
+  <div class="row"><span id="foot"></span><a id="footwa" href="#" target="_blank" rel="noopener"></a></div>
+</footer>
+
+<a class="wa" id="wa" href="#" target="_blank" rel="noopener" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.3A8.4 8.4 0 1 1 21 11.5z"/></svg>
+  Chat with us
+</a>
 
 <div id="pm" hidden role="dialog" aria-modal="true" aria-label="Product details">
   <div class="pm-box">
@@ -175,7 +211,7 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
       <div class="cat" id="pmcat"></div>
       <h3 id="pmname"></h3>
       <div class="price" id="pmprice"></div>
-      <p class="desc" id="pmdesc"></p>
+      <p class="desc" id="pmdesc"></p><p class="desc inc" id="pminc" hidden></p>
       <button class="add" id="pmadd" type="button"></button>
     </div>
   </div>
@@ -184,60 +220,110 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
 <div id="shade"></div>
 <aside id="cart" aria-label="Cart">
   <div class="cart-top"><h2>Your cart</h2><button class="x" id="close" aria-label="Close cart">&times;</button></div>
-  <div id="lines"></div>
-  <div class="engrave">
-    <label for="engrave">Name or word to engrave</label>
-    <input id="engrave" type="text" placeholder="e.g. Nour, or نور" autocomplete="off">
+  <div class="cart-body">
+    <div id="lines"></div>
+    <section class="co" id="co">
+      <h3>Delivery</h3>
+      <div class="fld"><label for="cn">Full name</label><input id="cn" type="text" autocomplete="name"></div>
+      <div class="fld"><label for="cp">Phone number</label><input id="cp" type="tel" inputmode="tel" autocomplete="tel" placeholder="01x xxxx xxxx"></div>
+      <div class="fld"><label for="cg">Governorate</label><select id="cg"></select></div>
+      <div class="fld"><label for="ca">Address</label><textarea id="ca" autocomplete="street-address" placeholder="Street, building, apartment"></textarea></div>
+      <div class="fld"><label for="engrave">Name or word to engrave</label><input id="engrave" type="text" placeholder="e.g. Nour, or نور" autocomplete="off"></div>
+      <div id="paywrap"><h3>Payment</h3><div id="pays" role="radiogroup" aria-label="Payment method"></div><div id="paynote"></div></div>
+    </section>
   </div>
-  <div class="sum"><span>Total</span><span id="tot"></span></div>
-  <a class="btn send" id="send" href="#" target="_blank" rel="noopener" aria-disabled="true">Send order on WhatsApp</a>
-  <p class="note" id="note"></p>
+  <div class="cart-foot">
+    <div class="sumrow"><span>Subtotal</span><span id="sub"></span></div>
+    <div class="sumrow"><span>Delivery</span><span id="ship"></span></div>
+    <div class="sumrow total"><span>Total</span><span id="tot"></span></div>
+    <p class="need" id="need" role="status"></p>
+    <a class="btn send" id="send" href="#" target="_blank" rel="noopener" aria-disabled="true">Send order on WhatsApp</a>
+    <p class="note" id="note"></p>
+  </div>
 </aside>
 
 <script>
 (function(){
   var $=function(i){return document.getElementById(i)};
   var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
-  var D=window.DEFAULT_STORE, STORE, PRODUCTS, cat="All", cart={}, cur=null, idx=0, lastFocus=null;
+  var D=window.DEFAULT_STORE, EG=window.EGYPT, STORE, PRODUCTS, CATS=[], cat="All", cart={}, cur=null, idx=0, lastFocus=null, pay="";
   try{cart=JSON.parse(localStorage.getItem("bracelet-cart")||"{}")}catch(e){cart={}}
   var money=function(n){return Number(n).toLocaleString("en-US")+" "+STORE.currency};
   var find=function(id){return PRODUCTS.filter(function(p){return p.id===id})[0]};
   var save=function(){try{localStorage.setItem("bracelet-cart",JSON.stringify(cart))}catch(e){}};
+  var onSale=function(p){return p.salePrice>0&&p.salePrice<p.price};
+  var eff=function(p){return onSale(p)?p.salePrice:p.price};
+  var priceHtml=function(p){return onSale(p)?'<s>'+money(p.price)+'</s><span class="now">'+money(p.salePrice)+'</span>':money(p.price)};
+  var govName=function(id){var g=EG.filter(function(x){return x.id===id})[0];return g?g.en:""};
+  var fee=function(id){var v=STORE.shipping[id];return v===undefined?null:v};   // null means no delivery there
 
   /* ----- shop ----- */
   function drawChips(){
-    var cats=["All"].concat(PRODUCTS.map(function(p){return p.category}).filter(function(v,i,a){return a.indexOf(v)===i}));
-    if(cats.indexOf(cat)<0)cat="All";
-    $("chips").hidden=cats.length<3;
-    $("chips").innerHTML=cats.map(function(c){return '<button type="button" data-c="'+esc(c)+'" aria-pressed="'+(c===cat)+'">'+esc(c)+"</button>"}).join("");
+    var names=["All"].concat(CATS.map(function(c){return c.name}));
+    if(PRODUCTS.some(onSale))names.push("Sale");
+    if(names.indexOf(cat)<0)cat="All";
+    $("chips").hidden=names.length<3;
+    $("chips").innerHTML=names.map(function(c){return '<button type="button" data-c="'+esc(c)+'" aria-pressed="'+(c===cat)+'">'+esc(c)+"</button>"}).join("");
   }
   function drawGrid(){
-    var list=PRODUCTS.filter(function(p){return cat==="All"||p.category===cat});
+    var list=PRODUCTS.filter(function(p){return cat==="All"||(cat==="Sale"?onSale(p):p.category===cat)});
     $("grid").innerHTML=list.map(function(p){
       var n=p.images.length;
       return '<article class="item'+(p.soldOut?' out':'')+'"><button class="ph" type="button" data-open="'+esc(p.id)+'" aria-label="View '+esc(p.name)+'">'+
-        (n?'<img src="'+esc(p.images[0])+'" alt="'+esc(p.name)+'" loading="lazy">':'<img alt="" style="visibility:hidden">')+(n>1?'<span class="count">1 / '+n+'</span>':'')+'</button>'+
-        '<div class="cat">'+esc(p.category)+'</div><h3><button class="titlebtn" type="button" data-open="'+esc(p.id)+'">'+esc(p.name)+'</button></h3><p class="desc">'+esc(p.desc)+'</p>'+
-        '<div class="foot"><span class="price">'+money(p.price)+'</span>'+
+        (n?'<img src="'+esc(p.images[0])+'" alt="'+esc(p.name)+'" loading="lazy">':'<img alt="" style="visibility:hidden">')+
+        (onSale(p)?'<span class="badge">-'+Math.round((1-p.salePrice/p.price)*100)+'%</span>':'')+(n>1?'<span class="count">1 / '+n+'</span>':'')+'</button>'+
+        '<div class="cat">'+esc(p.category)+'</div><h3><button class="titlebtn" type="button" data-open="'+esc(p.id)+'">'+esc(p.name)+'</button></h3><p class="desc">'+esc(p.desc)+'</p>'+(p.includes?'<p class="desc inc">Includes: '+esc(p.includes)+'</p>':'')+
+        '<div class="foot"><span class="price">'+priceHtml(p)+'</span>'+
         (p.soldOut?'<button class="add" type="button" disabled>Sold out</button>':'<button class="add" type="button" data-add="'+esc(p.id)+'">Add to cart</button>')+'</div></article>'}).join("");
-    if(!list.length)$("grid").innerHTML='<p class="empty-shop">New pieces are on the way.</p>';
+    if(!list.length)$("grid").innerHTML='<p class="empty-shop">'+(cat==="All"?"New pieces are on the way.":cat==="Sale"?"No sale items right now.":"New pieces are coming soon to "+esc(cat)+".")+'</p>';
   }
 
-  /* ----- cart ----- */
+  /* ----- cart and checkout ----- */
+  function field(id){return $(id).value.trim()}
+  function saveCustomer(){try{localStorage.setItem("bracelet-customer",JSON.stringify({n:field("cn"),p:field("cp"),g:$("cg").value,a:field("ca"),pay:pay}))}catch(e){}}
+  function drawPayNote(){
+    var m=STORE.payments.filter(function(x){return x.id===pay})[0];
+    if(!m){$("paynote").innerHTML="";return}
+    $("paynote").innerHTML=(m.note?'<p class="paynote">'+esc(m.note)+'</p>':'')+
+      (m.id==="instapay"&&m.handle?'<div class="handle"><code>'+esc(m.handle)+'</code><button type="button" data-copy="'+esc(m.handle)+'">Copy</button></div>':'');
+  }
   function drawCart(){
-    var ids=Object.keys(cart).filter(function(k){var p=find(k);return cart[k]>0&&p&&!p.soldOut}),total=0,n=0,msg="Hi "+STORE.name+", I would like to order:\n";
+    var ids=Object.keys(cart).filter(function(k){var p=find(k);return cart[k]>0&&p&&!p.soldOut}),sub=0,n=0,lines=[];
     $("lines").innerHTML=ids.length?ids.map(function(k){
-      var p=find(k),q=cart[k];total+=p.price*q;n+=q;msg+="- "+p.name+" x "+q+" ("+money(p.price*q)+")\n";
-      return '<div class="line"><img src="'+esc(p.images[0]||"")+'" alt=""><div><div class="t">'+esc(p.name)+'</div><div class="s">'+money(p.price*q)+'</div></div>'+
+      var p=find(k),q=cart[k],lt=eff(p)*q;sub+=lt;n+=q;lines.push("- "+p.name+" x "+q+" ("+money(lt)+")");
+      return '<div class="line"><img src="'+esc(p.images[0]||"")+'" alt=""><div><div class="t">'+esc(p.name)+'</div><div class="s">'+money(lt)+'</div></div>'+
         '<div class="qty"><button type="button" data-m="'+esc(k)+'" aria-label="Remove one">&minus;</button><span>'+q+'</span><button type="button" data-a="'+esc(k)+'" aria-label="Add one">+</button></div></div>'}).join(""):
       '<div class="none">Your cart is empty. Add a piece from the collection.</div>';
-    var eng=$("engrave").value.trim();
-    if(eng)msg+="Name to engrave: "+eng+"\n";
-    msg+="Total: "+money(total);
-    $("tot").textContent=money(total);$("cnt").textContent=n;
-    var s=$("send"),ok=ids.length&&STORE.whatsapp;
+    $("co").hidden=!ids.length;
+
+    var g=$("cg").value,f=g?fee(g):undefined,free=STORE.freeShippingOver>0&&sub>=STORE.freeShippingOver,shipCost=0,shipTxt;
+    if(!g)shipTxt="Choose governorate";
+    else if(f===null)shipTxt="Not available";
+    else{shipCost=free?0:f;shipTxt=free?"Free":money(f)}
+    var total=sub+shipCost;
+    $("sub").textContent=money(sub);$("ship").textContent=ids.length?shipTxt:"-";$("tot").textContent=money(total);$("cnt").textContent=n;
+
+    var miss=[];
+    if(!field("cn"))miss.push("name");
+    if((field("cp").match(/\d/g)||[]).length<10)miss.push("phone number");
+    if(!g)miss.push("governorate");
+    if(!field("ca"))miss.push("address");
+    var need="";
+    if(!ids.length)need="Add a piece to your cart first.";
+    else if(g&&f===null)need="Sorry, we do not deliver to "+govName(g)+" yet.";
+    else if(miss.length)need="Please add your "+miss.join(", ").replace(/, ([^,]*)$/," and $1")+".";
+    else if(!pay)need="Choose a payment method.";
+    $("need").textContent=need;
+
+    var ok=!need&&STORE.whatsapp,s=$("send");
+    if(ok){
+      var m=STORE.payments.filter(function(x){return x.id===pay})[0];
+      var msg="Hi "+STORE.name+", I would like to order:\n"+lines.join("\n")+"\nSubtotal: "+money(sub)+"\nDelivery to "+govName(g)+": "+(free?"Free":money(f))+"\nTotal: "+money(total)+
+        "\nPayment: "+(m?m.label:"")+(m&&m.id==="instapay"?" (I will send the transfer receipt here)":"")+
+        "\n\nName: "+field("cn")+"\nPhone: "+field("cp")+"\nAddress: "+govName(g)+", "+field("ca")+(field("engrave")?"\nName to engrave: "+field("engrave"):"");
+      s.href="https://wa.me/"+STORE.whatsapp+"?text="+encodeURIComponent(msg);
+    }else s.href="#";
     s.setAttribute("aria-disabled",ok?"false":"true");
-    s.href=ok?"https://wa.me/"+STORE.whatsapp+"?text="+encodeURIComponent(msg):"#";
     save();
   }
   function toggle(on){$("cart").classList.toggle("on",on);$("shade").classList.toggle("on",on);if(on)$("close").focus()}
@@ -250,7 +336,7 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
     $("pmcount").hidden=!many;$("pmcount").textContent=(idx+1)+" / "+im.length;
     $("pmthumbs").hidden=!many;
     $("pmthumbs").innerHTML=many?im.map(function(u,i){return '<button type="button" data-t="'+i+'" aria-label="Photo '+(i+1)+'"'+(i===idx?' aria-current="true"':'')+'><img src="'+esc(u)+'" alt=""></button>'}).join(""):"";
-    $("pmcat").textContent=cur.category;$("pmname").textContent=cur.name;$("pmprice").textContent=money(cur.price);$("pmdesc").textContent=cur.desc;
+    $("pmcat").textContent=cur.category;$("pmname").textContent=cur.name;$("pmprice").innerHTML=priceHtml(cur);$("pmdesc").textContent=cur.desc;$("pminc").hidden=!cur.includes;$("pminc").textContent="Includes: "+(cur.includes||"");
     var b=$("pmadd");b.disabled=!!cur.soldOut;b.textContent=cur.soldOut?"Sold out":"Add to cart";b.classList.remove("done");
   }
   function openP(id){
@@ -262,26 +348,52 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
     if(lastFocus&&lastFocus.focus)lastFocus.focus();
   }
   function step(d){if(!cur||cur.images.length<2)return;idx=(idx+d+cur.images.length)%cur.images.length;drawP()}
-
   function flash(b){b.textContent="Added";b.classList.add("done");setTimeout(function(){b.textContent="Add to cart";b.classList.remove("done")},1100)}
 
   function start(d){
     STORE=Object.assign({},D.store,d.store);
     STORE.theme=Theme.apply(STORE.theme);
     try{localStorage.setItem("bracelet-theme",JSON.stringify(STORE.theme))}catch(e){}
+    STORE.shipping=Object.assign({},D.store.shipping,d.store.shipping||{});
     PRODUCTS=d.products.filter(function(p){return p.visible!==false}).map(function(p){
-      p.images=Array.isArray(p.images)&&p.images.length?p.images:(p.image?[p.image]:[]);return p});
+      p.images=Array.isArray(p.images)&&p.images.length?p.images:(p.image?[p.image]:[]);p.salePrice=Number(p.salePrice)||0;return p});
+    CATS=(Array.isArray(STORE.categories)&&STORE.categories.length?STORE.categories:PRODUCTS.map(function(p){return p.category}).filter(function(v,i,a){return a.indexOf(v)===i}).map(function(n){return {name:n,show:true}})).filter(function(c){return c.show!==false});
+    STORE.payments=(STORE.payments||[]).filter(function(p){return p.enabled!==false});
+
     document.title=STORE.name;
     document.querySelector(".mark").textContent=STORE.name;
+    $("announce").textContent=STORE.announcement||"";$("announce").hidden=!STORE.announcement;
     $("eyebrow").textContent=STORE.heroEyebrow;$("eyebrow").hidden=!STORE.heroEyebrow;
     $("title").textContent=STORE.heroTitle;$("lead").textContent=STORE.heroLead;
     $("heroimg").src=STORE.heroImage;$("herocap").textContent=STORE.heroCaption;
     $("perks").innerHTML=(STORE.perks||[]).filter(function(p){return p[0]||p[1]}).map(function(p){return "<div><strong>"+esc(p[0])+"</strong>"+esc(p[1])+"</div>"}).join("");
     $("perks").hidden=!$("perks").innerHTML;
+
+    // footer: payment methods and contact
+    $("accept").innerHTML=STORE.payments.length?'<span>We accept</span>'+STORE.payments.map(function(p){return '<span class="pill">'+esc(p.label)+'</span>'}).join(""):"";
     $("foot").textContent="© 2026 "+STORE.name;
-    $("note").textContent="Your order opens in WhatsApp as a ready message to +"+STORE.whatsapp+". Nothing is paid on this page.";
+    var wa=STORE.whatsapp?"https://wa.me/"+STORE.whatsapp+"?text="+encodeURIComponent("Hi "+STORE.name+"!"):"";
+    $("wa").hidden=!wa;$("wa").href=wa||"#";
+    $("footwa").hidden=!wa;$("footwa").href=wa||"#";$("footwa").textContent="WhatsApp +"+STORE.whatsapp;
+
+    // delivery form
+    $("cg").innerHTML='<option value="">Choose governorate</option>'+EG.map(function(g){var f=fee(g.id);
+      return '<option value="'+g.id+'"'+(f===null?' disabled':'')+'>'+esc(g.en)+(f===null?' (not available)':' ('+money(f)+')')+'</option>'}).join("");
+    $("pays").innerHTML=STORE.payments.map(function(p){return '<label class="pay" data-p="'+esc(p.id)+'"><input type="radio" name="pay" value="'+esc(p.id)+'"> <span>'+esc(p.label)+'</span></label>'}).join("");
+    $("paywrap").hidden=!STORE.payments.length;
+    var cu={};try{cu=JSON.parse(localStorage.getItem("bracelet-customer")||"{}")}catch(e){}
+    $("cn").value=cu.n||"";$("cp").value=cu.p||"";$("ca").value=cu.a||"";
+    if(cu.g&&fee(cu.g)!==null&&fee(cu.g)!==undefined)$("cg").value=cu.g;
+    pay=STORE.payments.some(function(p){return p.id===cu.pay})?cu.pay:(STORE.payments[0]?STORE.payments[0].id:"");
+    syncPay();
+    $("note").textContent="Your order opens in WhatsApp as a ready message to +"+STORE.whatsapp+". "+(STORE.freeShippingOver>0?"Free delivery on orders over "+money(STORE.freeShippingOver)+". ":"")+"Nothing is paid on this page.";
+
     drawChips();drawGrid();drawCart();
     document.body.classList.remove("pending");
+  }
+  function syncPay(){
+    [].forEach.call($("pays").querySelectorAll(".pay"),function(l){var on=l.dataset.p===pay;l.classList.toggle("on",on);l.querySelector("input").checked=on});
+    drawPayNote();
   }
 
   document.addEventListener("click",function(e){
@@ -292,7 +404,11 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
     if(b.dataset.a){cart[b.dataset.a]++;drawCart()}
     if(b.dataset.m){cart[b.dataset.m]--;drawCart()}
     if(b.dataset.t){idx=Number(b.dataset.t);drawP()}
+    if(b.dataset.copy){var t=b.dataset.copy;try{navigator.clipboard.writeText(t).then(function(){b.textContent="Copied"},function(){b.textContent=t})}catch(err){b.textContent=t}}
   });
+  $("pays").addEventListener("change",function(e){pay=e.target.value;syncPay();saveCustomer();drawCart()});
+  ["cn","cp","ca","engrave"].forEach(function(i){$(i).addEventListener("input",function(){saveCustomer();drawCart()})});
+  $("cg").addEventListener("change",function(){saveCustomer();drawCart()});
   $("pmadd").onclick=function(){if(!cur)return;cart[cur.id]=(cart[cur.id]||0)+1;drawCart();flash(this)};
   $("pmx").onclick=closeP;
   $("pm").addEventListener("click",function(e){if(e.target===this)closeP()});
@@ -306,7 +422,6 @@ try{var c=JSON.parse(localStorage.getItem("bracelet-theme")||"null");Theme.apply
     if(e.key==="Escape"){if(!$("pm").hidden)closeP();else toggle(false)}
     if(!$("pm").hidden){if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)}
   });
-  $("engrave").addEventListener("input",drawCart);
 
   // Load what the owner saved from the admin panel. If that is not available
   // (first visit before any save, or a slow connection), use the built-in data.
